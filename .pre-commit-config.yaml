@@ -1,0 +1,50 @@
+# Pre-commit hooks para calidad de código
+repos:
+  # Pre-commit hooks generales
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=10000']
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  # isort - Ordenar imports
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--profile", "black", "--line-length", "79"]
+
+  # Black - Formateador de código
+  - repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+      - id: black
+        language_version: python3
+        args: ['--line-length=79']
+
+  # Flake8 - Linter de código
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: ['--max-line-length=79', '--extend-ignore=E203,W503']
+        additional_dependencies: [flake8-docstrings]
+
+  # MyPy - Type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-requests
+          - pandas-stubs
+          - types-setuptools
+        args: [--ignore-missing-imports, --no-strict-optional]
