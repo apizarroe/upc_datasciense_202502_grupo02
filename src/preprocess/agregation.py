@@ -2,6 +2,7 @@
 
 import pandas as pd
 
+
 def create_customer_features(df):
     """Crear características agregadas por cliente OPTIMIZADAS."""
     print("Creando características de cliente OPTIMIZADAS...")
@@ -20,7 +21,7 @@ def create_customer_features(df):
     # Renombrar columnas
     customer_features.columns = [
         "Customer_Transaction_Count",
-        "Customer_Avg_Spent", 
+        "Customer_Avg_Spent",
         "Customer_Discount_Frequency"
     ]
 
@@ -30,6 +31,7 @@ def create_customer_features(df):
     ).dt.days
 
     return customer_features.reset_index()
+
 
 def create_product_features(df):
     """Crear características agregadas por producto/categoría OPTIMIZADAS."""
@@ -61,6 +63,7 @@ def create_product_features(df):
 
     return product_features.reset_index()
 
+
 def enrich_transaction_data(df, customer_features, product_features):
     """Enriquecer datos de transacción con características agregadas OPTIMIZADAS."""
     print("Enriqueciendo datos de transacción OPTIMIZADO...")
@@ -70,7 +73,7 @@ def enrich_transaction_data(df, customer_features, product_features):
     # Unir características de cliente
     df_enriched = df_enriched.merge(
         customer_features,
-        on="Customer ID", 
+        on="Customer ID",
         how="left"
     )
 
