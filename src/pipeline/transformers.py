@@ -16,8 +16,8 @@ from preprocess.agregation import (  # noqa: E402
 )
 from preprocess.cleaning import clean_data  # noqa: E402
 from preprocess.preprocesing import (  # noqa: E402
-    prepare_features_target,
     preprocess_for_regression,
+    prepare_features_optimized,  # Cambio aquí: importar la nueva función
 )
 
 # Configurar logging
@@ -70,16 +70,8 @@ def run_pipeline(input_file, output_dir="data/processed"):
 
         # 5. Preparar datos para entrenamiento
         logger.info("\n🎯 Preparando datos para entrenamiento...")
-        X, y, feature_columns = prepare_features_target(
-            df_processed,
-            target_column="Total Spent",
-            exclude_columns=[
-                "Transaction ID",
-                "Customer ID",
-                "Transaction Date",
-                "Total Spent",
-            ],
-        )
+        # Cambio aquí: usar prepare_features_optimized en lugar de prepare_features_target
+        X, y, feature_columns = prepare_features_optimized(df_processed)
 
         # Crear dataset de entrenamiento (X + y)
         training_data = X.copy()

@@ -1,22 +1,21 @@
-"""Módulo para preprocesamiento de datos y preparación de modelos."""
+"""Módulo para preprocesamiento OPTIMIZADO de datos."""
 
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
-
 def preprocess_for_regression(df, target_column="Total Spent"):
-    """Preprocesamiento para modelo de regresión (predecir Total Spent)."""
+    """Preprocesamiento OPTIMIZADO para modelo de regresión."""
     df_processed = df.copy()
 
-    print("Preprocesamiento para predicción de Total Spent...")
+    print("Preprocesamiento OPTIMIZADO para predicción de Total Spent...")
 
-    # 1. Codificación de variables categóricas
-    categorical_columns = ["Category", "Item", "Payment Method", "Location"]
+    # 1. SOLO codificar categóricas esenciales
+    essential_categoricals = ["Category", "Payment Method", "Location"]
     label_encoders = {}
 
-    for col in categorical_columns:
+    for col in essential_categoricals:
         if col in df_processed.columns:
             le = LabelEncoder()
             df_processed[f"{col}_encoded"] = le.fit_transform(
@@ -24,104 +23,73 @@ def preprocess_for_regression(df, target_column="Total Spent"):
             )
             label_encoders[col] = le
 
-    # 2. Extracción de características de fecha
+    # 2. Extracción de características temporales ESENCIALES
     if "Transaction Date" in df_processed.columns:
-        print("Extrayendo características de fecha...")
+        df_processed["Transaction_DayOfWeek"] = df_processed["Transaction Date"].dt.dayofweek
+        df_processed["Transaction_IsWeekend"] = (df_processed["Transaction_DayOfWeek"] >= 5).astype(int)
 
-        df_processed["Transaction_Year"] = df_processed[
-            "Transaction Date"
-        ].dt.year
-        df_processed["Transaction_Month"] = df_processed[
-            "Transaction Date"
-        ].dt.month
-        df_processed["Transaction_Day"] = df_processed[
-            "Transaction Date"
-        ].dt.day
-        df_processed["Transaction_DayOfWeek"] = df_processed[
-            "Transaction Date"
-        ].dt.dayofweek
-        df_processed["Transaction_Quarter"] = df_processed[
-            "Transaction Date"
-        ].dt.quarter
-        df_processed["Transaction_IsWeekend"] = (
-            df_processed["Transaction_DayOfWeek"] >= 5
-        ).astype(int)
-
-    # 3. Creación de nuevas características relevantes para Total Spent
-    print("Creando nuevas características...")
-
-    # Interacción entre precio y cantidad
-    df_processed["Expected_Total"] = (
+    # 3. SOLO características derivadas CLAVE
+    # Interacción precio-cantidad (MUY importante)
+    df_processed["Price_Quantity_Interaction"] = (
         df_processed["Price Per Unit"] * df_processed["Quantity"]
     )
 
-    # Ratio precio/cantidad
-    df_processed["Price_Quantity_Ratio"] = df_processed["Price Per Unit"] / (
-        df_processed["Quantity"] + 1
-    )
+    # 4. Codificación booleana simple
+    df_processed["Discount_Applied"] = df_processed["Discount Applied"].astype(int)
 
-    # Segmentación de transacciones por monto
-    df_processed["Transaction_Size"] = pd.cut(
-        df_processed["Total Spent"],
-        bins=[0, 100, 500, 1000, float("inf")],
-        labels=["Small", "Medium", "Large", "Very Large"],
-    )
-
-    # Codificación de Transaction_Size
-    le_size = LabelEncoder()
-    df_processed["Transaction_Size_encoded"] = le_size.fit_transform(
-        df_processed["Transaction_Size"]
-    )
-    label_encoders["Transaction_Size"] = le_size
-
-    # 4. Codificación one-hot para variables categóricas importantes
-    categorical_for_onehot = ["Category", "Location", "Payment Method"]
-
-    for col in categorical_for_onehot:
-        if col in df_processed.columns:
-            dummies = pd.get_dummies(df_processed[col], prefix=col)
-            df_processed = pd.concat([df_processed, dummies], axis=1)
-
-    # 5. Codificación booleana
-    df_processed["Discount_Applied"] = df_processed["Discount Applied"].astype(
-        int
-    )
-
-    print(f"Dataset después de preprocesamiento: {df_processed.shape}")
+    print(f"Dataset después de preprocesamiento OPTIMIZADO: {df_processed.shape}")
     return df_processed, label_encoders
 
-
-def prepare_features_target(
-    df, target_column="Total Spent", exclude_columns=None
-):
-    """Preparar características (X) y variable objetivo (y) para modelo."""
-    if exclude_columns is None:
-        exclude_columns = [
-            "Transaction ID",
-            "Customer ID",
-            "Transaction Date",
-            target_column,
-        ]
-
-    # Identificar columnas a excluir
-    columns_to_exclude = [col for col in exclude_columns if col in df.columns]
-
-    # Características (X) - excluir columnas no deseadas y la variable objetivo
-    feature_columns = [
-        col
-        for col in df.columns
-        if col not in columns_to_exclude and col != target_column
+def prepare_features_optimized(df, target_column="Total Spent"):
+    """Preparar características OPTIMIZADAS evitando data leakage."""
+    print("Preparando características OPTIMIZADAS...")
+    
+    # DEFINIR MANUALMENTE las características que SÍ usaremos
+    selected_features = [
+        # Variables base
+        'Price Per Unit', 'Quantity', 'Discount_Applied',
+        
+        # Interacciones
+        'Price_Quantity_Interaction',
+        
+        # Características temporales
+        'Transaction_DayOfWeek', 'Transaction_IsWeekend',
+        
+        # Categóricas codificadas
+        'Category_encoded', 'Payment Method_encoded', 'Location_encoded',
+        
+        # Características de cliente OPTIMIZADAS
+        'Customer_Transaction_Count', 'Customer_Avg_Spent', 
+        'Customer_Discount_Frequency', 'Customer_Recency',
+        
+        # Características de producto OPTIMIZADAS  
+        'Product_Transaction_Count', 'Product_Avg_Price',
+        'Product_Discount_Rate', 'Product_Popularity_Score'
     ]
-    X = df[feature_columns]
-
-    # Variable objetivo (y)
-    y = df[target_column]
-
-    print(f"Características: {X.shape[1]} columnas")
-    print(f"Variable objetivo: {y.name}")
-
-    return X, y, feature_columns
-
+    
+    # Filtrar solo las que existen en el dataset
+    existing_features = [f for f in selected_features if f in df.columns]
+    
+    # Agregar el target
+    if target_column in df.columns:
+        existing_features.append(target_column)
+    
+    # Crear dataset optimizado
+    df_optimized = df[existing_features]
+    
+    # Separar X e y
+    X = df_optimized.drop(target_column, axis=1)
+    y = df_optimized[target_column]
+    
+    print(f"✅ Características OPTIMIZADAS: {X.shape[1]} variables")
+    print(f"✅ Registros: {X.shape[0]} transacciones")
+    
+    # Mostrar las características seleccionadas
+    print("\n🔍 Características seleccionadas:")
+    for i, col in enumerate(X.columns, 1):
+        print(f"   {i:2d}. {col}")
+    
+    return X, y, X.columns.tolist()
 
 def split_and_scale_data(X, y, test_size=0.2, random_state=42):
     """Dividir datos en train/test y escalar características numéricas."""
@@ -141,9 +109,7 @@ def split_and_scale_data(X, y, test_size=0.2, random_state=42):
     X_train_scaled = X_train.copy()
     X_test_scaled = X_test.copy()
 
-    X_train_scaled[numeric_columns] = scaler.fit_transform(
-        X_train[numeric_columns]
-    )
+    X_train_scaled[numeric_columns] = scaler.fit_transform(X_train[numeric_columns])
     X_test_scaled[numeric_columns] = scaler.transform(X_test[numeric_columns])
 
     return X_train_scaled, X_test_scaled, y_train, y_test, scaler
