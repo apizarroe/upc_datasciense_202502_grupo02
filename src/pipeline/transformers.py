@@ -15,10 +15,10 @@ from preprocess.agregation import (  # noqa: E402
     enrich_transaction_data,
 )
 from preprocess.cleaning import clean_data  # noqa: E402
-from preprocess.preprocesing import (  # noqa: E402
-    preprocess_for_regression,
+from preprocess.preprocesing import (
     prepare_features_optimized,  # Cambio aquí: importar la nueva función
 )
+from preprocess.preprocesing import preprocess_for_regression  # noqa: E402
 
 # Configurar logging
 logging.basicConfig(
@@ -63,9 +63,17 @@ def run_pipeline(input_file, output_dir="data/processed"):
         logger.info("\n⚙️ Realizando preprocesamiento...")
         df_processed, label_encoders = preprocess_for_regression(df_enriched)
 
+        # Los registros con nulos en "Discount Applied" se guardan aparte
+        df_nulos = df_processed[df_processed["Discount Applied"] == 2]
+        df_no_nulos = df_processed[df_processed["Discount Applied"] != 2]
+
         # Guardar datos procesados
         processed_path = os.path.join(output_dir, "data_processed.parquet")
-        df_processed.to_parquet(processed_path, index=False)
+        df_no_nulos.to_parquet(processed_path, index=False)
+        processed_path = os.path.join(
+            output_dir, "data_for_prediction.parquet"
+        )
+        df_nulos.to_parquet(processed_path, index=False)
         logger.info("✅ data_processed.parquet")
 
         # 5. Preparar datos para entrenamiento
@@ -84,18 +92,15 @@ def run_pipeline(input_file, output_dir="data/processed"):
 
         # 6. Resumen final
         logger.info("\n" + "=" * 50)
-        logger.info("✅ PIPELINE COMPLETADO EXITOSAMENTE!")
+        logger.info("✅ PIPELINE DE PREPROCESAMIENTO COMPLETADO!")
         logger.info("=" * 50)
         logger.info(f"📁 Archivos guardados en: {output_dir}")
         logger.info(" - data_cleaned.parquet")
         logger.info(" - data_processed.parquet")
-        logger.info(" - data_training.parquet")
 
         return {
             "df_clean": df_clean,
             "df_processed": df_processed,
-            "training_data": training_data,
-            "feature_columns": feature_columns,
             "label_encoders": label_encoders,
         }
 
