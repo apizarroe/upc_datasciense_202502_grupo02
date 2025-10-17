@@ -15,7 +15,7 @@ from preprocess.agregation import (  # noqa: E402
     enrich_transaction_data,
 )
 from preprocess.cleaning import clean_data  # noqa: E402
-from preprocess.preprocesing import preprocess_for_regression  # noqa: E402
+from preprocess.preprocesing import preprocess_for_classification  # noqa: E402
 
 # Configurar logging
 logging.basicConfig(
@@ -58,7 +58,7 @@ def run_pipeline(input_file, output_dir="data/processed"):
 
         # 4. Preprocesamiento
         logger.info("\n⚙️ Realizando preprocesamiento...")
-        df_processed, label_encoders = preprocess_for_regression(df_enriched)
+        df_processed, label_encoders = preprocess_for_classification(df_enriched)
 
         # Guardar datos procesados
         processed_path = os.path.join(output_dir, "data_processed.parquet")
