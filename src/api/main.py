@@ -149,12 +149,14 @@ async def predict_single(request: PredictionRequest):
     ------------------
         {
             "features": {
-                "Age": 0.5234,
-                "Quantity": 1.234,
-                "Price Per Unit": -0.456,
-                "Category_0": 1,
-                "Category_1": 0,
-                "Gender_Male": 1,
+                "Price Per Unit": -0.453,
+                "Quantity": 1.592,
+                "Customer_Transaction_Count": 0.726,
+                "Customer_Avg_Spent": -1.755,
+                "Transaction_Year": 2024,
+                "Transaction_Month": 4,
+                "Category_7": 1,
+                "Location_1": 1,
                 ...
             }
         }
@@ -223,8 +225,8 @@ async def predict_batch_endpoint(request: BatchPredictionRequest):
     ------------------
         {
             "data_list": [
-                {"Age": 0.5234, "Quantity": 1.234, ...},
-                {"Age": -0.234, "Quantity": 2.567, ...}
+                {"Price Per Unit": -0.453, "Quantity": 1.592, "Transaction_Year": 2024, ...},
+                {"Price Per Unit": 0.234, "Quantity": -0.567, "Transaction_Year": 2023, ...}
             ]
         }
 

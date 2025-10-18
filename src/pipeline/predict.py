@@ -292,12 +292,14 @@ def predict_from_dict(data_dict, model_dir="data/models"):
     Ejemplo de data_dict
     --------------------
         {
-            "Age": 0.5234,
-            "Quantity": 1.234,
-            "Price Per Unit": -0.456,
-            "Category_0": 1,
-            "Category_1": 0,
-            "Gender_Male": 1,
+            "Price Per Unit": -0.453,
+            "Quantity": 1.592,
+            "Customer_Transaction_Count": 0.726,
+            "Customer_Avg_Spent": -1.755,
+            "Transaction_Year": 2024,
+            "Transaction_Month": 4,
+            "Category_7": 1,
+            "Location_1": 1,
             # ... todas las features preprocesadas
         }
 
