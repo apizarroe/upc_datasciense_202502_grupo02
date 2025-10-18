@@ -1,6 +1,7 @@
 """Script para probar la API usando datos reales del dataset procesado."""
 
 import os
+from typing import Any, Optional, Tuple, Union
 
 import pandas as pd
 import requests
@@ -9,7 +10,9 @@ import requests
 API_URL = "http://localhost:8000"
 
 
-def load_sample_data(n_samples: int = 5) -> tuple[pd.DataFrame | None, any]:
+def load_sample_data(
+    n_samples: int = 5,
+) -> Tuple[Optional[pd.DataFrame], Any]:
     """Cargar datos de muestra del dataset procesado."""
     try:
         print("📥 Cargando datos procesados...")
@@ -37,7 +40,10 @@ def load_sample_data(n_samples: int = 5) -> tuple[pd.DataFrame | None, any]:
         return sample_df, y_true
 
     except FileNotFoundError:
-        print("❌ Error: No se encontró data/processed/data_processed.parquet")
+        print(
+            "❌ Error: No se encontró "
+            "data/processed/data_processed.parquet"
+        )
         print("   Ejecuta primero el preprocesamiento de datos")
         return None, None
     except Exception as e:

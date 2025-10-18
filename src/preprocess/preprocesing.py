@@ -1,6 +1,7 @@
 """Módulo para preprocesamiento OPTIMIZADO de datos (clasificación)."""
 
 import logging
+from typing import Tuple
 
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
@@ -9,7 +10,9 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 logger = logging.getLogger(__name__)
 
 
-def preprocess_for_classification(df: pd.DataFrame, target_column: str = "Discount Applied") -> tuple[pd.DataFrame, dict]:
+def preprocess_for_classification(
+    df: pd.DataFrame, target_column: str = "Discount Applied"
+) -> Tuple[pd.DataFrame, dict]:
     """Preprocesamiento para modelo de clasificación (descuento sí/no)."""
     df_processed = df.copy()
     logger.info("Iniciando preprocesamiento para clasificación...")
@@ -62,7 +65,7 @@ def preprocess_for_classification(df: pd.DataFrame, target_column: str = "Discou
         errors="ignore",
     )
 
-    # 6. One-hot encoding para variables categóricas de ubicación o categoría
+    # 6. One-hot encoding para variables categóricas
     categorical_for_onehot = ["Category", "Location", "Payment Method"]
     for col in categorical_for_onehot:
         if col in df_processed.columns:
@@ -72,10 +75,10 @@ def preprocess_for_classification(df: pd.DataFrame, target_column: str = "Discou
 
     # 7. Escalar solo variables numéricas continuas
     scaler = StandardScaler()
-    numeric_cols = df_processed.select_dtypes(
+    numeric_cols_index = df_processed.select_dtypes(
         include=["int64", "float64"]
     ).columns
-    numeric_cols = [c for c in numeric_cols if c != target_column]
+    numeric_cols = [c for c in numeric_cols_index if c != target_column]
 
     df_processed[numeric_cols] = scaler.fit_transform(
         df_processed[numeric_cols]

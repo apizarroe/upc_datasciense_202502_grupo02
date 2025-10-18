@@ -212,7 +212,9 @@ async def predict_single(request: PredictionRequest) -> PredictionResponse:
     status_code=status.HTTP_200_OK,
     tags=["Predictions"],
 )
-async def predict_batch_endpoint(request: BatchPredictionRequest) -> BatchPredictionResponse:
+async def predict_batch_endpoint(
+    request: BatchPredictionRequest,
+) -> BatchPredictionResponse:
     """Predecir descuentos para multiples transacciones en batch.
 
     Args

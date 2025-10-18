@@ -3,7 +3,7 @@
 import logging
 import os
 from datetime import datetime
-from typing import Any
+from typing import Optional, Union
 
 import joblib
 import pandas as pd
@@ -62,7 +62,9 @@ def load_model_artifacts(model_dir: str = "data/models") -> dict:
 # =============================================================================
 
 
-def preprocess_for_prediction(data: dict | pd.DataFrame, feature_columns: list) -> pd.DataFrame:
+def preprocess_for_prediction(
+    data: Union[dict, pd.DataFrame], feature_columns: list
+) -> pd.DataFrame:
     """Preparar datos preprocesados para prediccion.
 
     IMPORTANTE: Esta funcion asume que los datos YA ESTAN preprocesados
@@ -111,7 +113,9 @@ def preprocess_for_prediction(data: dict | pd.DataFrame, feature_columns: list) 
 # =============================================================================
 
 
-def predict_discount_applied(data: dict | pd.DataFrame, model_dir: str = "data/models") -> dict:
+def predict_discount_applied(
+    data: Union[dict, pd.DataFrame], model_dir: str = "data/models"
+) -> dict:
     """Predecir si se aplicara descuento (para uso en API).
 
     Args
@@ -177,7 +181,9 @@ def predict_discount_applied(data: dict | pd.DataFrame, model_dir: str = "data/m
     return result
 
 
-def predict_batch(data_list: list, model_dir: str = "data/models", save_results: bool = True) -> list:
+def predict_batch(
+    data_list: list, model_dir: str = "data/models", save_results: bool = True
+) -> list:
     """Predecir multiples transacciones en batch.
 
     Args
@@ -245,9 +251,9 @@ def predict_batch(data_list: list, model_dir: str = "data/models", save_results:
 def predict_from_parquet(
     parquet_path: str = "data/processed/data_processed.parquet",
     model_dir: str = "data/models",
-    row_index: int | None = None,
+    row_index: Optional[int] = None,
     save_results: bool = True,
-) -> dict | list:
+) -> Union[dict, list]:
     """Predecir desde archivo parquet (simula llamada de API).
 
     Args
