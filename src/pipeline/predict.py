@@ -183,7 +183,8 @@ def predict_batch(data_list, model_dir="data/models", save_results=True):
     ----
         data_list: Lista de dicts con datos de transacciones
         model_dir: Directorio donde estan los modelos
-        save_results: Si True, guarda resultados en data/processed/data_predicted.parquet
+        save_results: Si True, guarda resultados en
+            data/processed/data_predicted.parquet
 
     Returns
     -------
@@ -253,7 +254,8 @@ def predict_from_parquet(
         parquet_path: Ruta al archivo parquet con datos preprocesados
         model_dir: Directorio donde estan los modelos
         row_index: Indice de fila especifica (None = todas las filas)
-        save_results: Si True, guarda resultados batch en data_predicted.parquet
+        save_results: Si True, guarda resultados batch en
+            data_predicted.parquet
 
     Returns
     -------
@@ -269,9 +271,11 @@ def predict_from_parquet(
     # Si se especifica un indice, tomar solo esa fila
     if row_index is not None:
         if row_index >= len(df):
-            raise ValueError(
-                f"Indice {row_index} fuera de rango. Dataset tiene {len(df)} filas."
+            msg = (
+                f"Indice {row_index} fuera de rango. "
+                f"Dataset tiene {len(df)} filas."
             )
+            raise ValueError(msg)
         data = df.iloc[row_index : row_index + 1]
         logger.info(f"Prediciendo fila #{row_index}")
         return predict_discount_applied(data, model_dir=model_dir)
@@ -333,7 +337,7 @@ if __name__ == "__main__":
 
         df_processed = pd.read_parquet(parquet_path)
         df_processed = df_processed.drop(columns=["Discount Applied"])
-        print(df_processed.info())
+        df_processed.info()
 
         result = predict_from_parquet(
             parquet_path=parquet_path,
@@ -343,12 +347,10 @@ if __name__ == "__main__":
 
         logger.info("\n📊 Respuesta de API (JSON):")
         logger.info(f"   discount_applied: {result['discount_applied']}")
-        logger.info(
-            f"   probability_discount: {result['probability_discount']:.4f}"
-        )
-        logger.info(
-            f"   probability_no_discount: {result['probability_no_discount']:.4f}"
-        )
+        prob_discount = result["probability_discount"]
+        logger.info(f"   probability_discount: {prob_discount:.4f}")
+        prob_no_discount = result["probability_no_discount"]
+        logger.info(f"   probability_no_discount: {prob_no_discount:.4f}")
         logger.info(f"   confidence: {result['confidence']:.4f}")
         logger.info(f"   timestamp: {result['timestamp']}")
         logger.info(f"   model_type: {result['model_info']['model_type']}")

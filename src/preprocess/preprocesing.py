@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def preprocess_for_classification(df, target_column="Discount Applied"):
-    """Preprocesamiento OPTIMIZADO para modelo de clasificación (descuento sí/no)."""
+    """Preprocesamiento para modelo de clasificación (descuento sí/no)."""
     df_processed = df.copy()
     logger.info("Iniciando preprocesamiento para clasificación...")
 
@@ -83,7 +83,9 @@ def preprocess_for_classification(df, target_column="Discount Applied"):
 
     # Escalar datos de predicción con el mismo scaler
     # if len(df_for_prediction) > 0:
-    #    df_for_prediction[numeric_cols] = scaler.transform(df_for_prediction[numeric_cols])
+    #    df_for_prediction[numeric_cols] = scaler.transform(
+    #        df_for_prediction[numeric_cols]
+    #    )
 
     logger.info(f"Columnas escaladas: {len(numeric_cols)}")
     logger.info(f"Preprocesamiento completado: {df_processed.shape}")

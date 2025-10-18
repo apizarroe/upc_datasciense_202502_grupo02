@@ -55,9 +55,11 @@ def clean_data(df):  # noqa: C901
 
     rows_with_nulls_after = df_clean.isnull().any(axis=1).sum()
     if rows_with_nulls_after > 0:
-        logger.warning(
-            f"Registros con nulos después de imputación: {rows_with_nulls_after}"
+        msg = (
+            f"Registros con nulos después de imputación: "
+            f"{rows_with_nulls_after}"
         )
+        logger.warning(msg)
 
     # 2. Eliminar duplicados
     duplicates = df_clean.duplicated(subset=["Transaction ID"]).sum()
@@ -80,9 +82,11 @@ def clean_data(df):  # noqa: C901
         mask_inconsistent = discrepancy > (df_clean["Total Spent"] * 0.01)
         inconsistent_count = mask_inconsistent.sum()
         if inconsistent_count > 0:
-            logger.info(
-                f"Registros con inconsistencias corregidos: {inconsistent_count}"
+            msg = (
+                f"Registros con inconsistencias corregidos: "
+                f"{inconsistent_count}"
             )
+            logger.info(msg)
         df_clean.loc[mask_inconsistent, "Total Spent"] = calculated_total[
             mask_inconsistent
         ]

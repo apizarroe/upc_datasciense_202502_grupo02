@@ -319,13 +319,18 @@ def train_discount_applied_model(
         df_processed: DataFrame con datos preprocesados
         test_size: Proporcion de datos para test (default 0.2)
         max_depth: Profundidad maxima del arbol (None = sin limite)
-        min_samples_split: Minimo de muestras requeridas para dividir nodo (default 2)
-        min_samples_leaf: Minimo de muestras requeridas en nodo hoja (default 1)
-        max_features: Numero maximo de features a considerar en cada split (None, 'sqrt', 'log2', int, float)
-        criterion: Funcion para medir calidad del split ('gini' o 'entropy')
+        min_samples_split: Minimo de muestras requeridas para dividir
+            nodo (default 2)
+        min_samples_leaf: Minimo de muestras requeridas en nodo hoja
+            (default 1)
+        max_features: Numero maximo de features a considerar en cada
+            split (None, 'sqrt', 'log2', int, float)
+        criterion: Funcion para medir calidad del split
+            ('gini' o 'entropy')
         splitter: Estrategia para dividir nodos ('best' o 'random')
         max_leaf_nodes: Numero maximo de nodos hoja (None = sin limite)
-        min_impurity_decrease: Umbral minimo de reduccion de impureza para hacer split
+        min_impurity_decrease: Umbral minimo de reduccion de impureza
+            para hacer split
         class_weight: Pesos de clases ('balanced', None, dict)
         ccp_alpha: Parametro de poda de complejidad (0.0 = sin poda)
         random_state: Semilla para reproducibilidad
@@ -672,12 +677,10 @@ if __name__ == "__main__":
     # logger.info("✅ OPTIMIZACION COMPLETADA")
     # logger.info("=" * 70)
     # logger.info(f"CV Score: {optimization_result['cv_score']:.4f}")
-    # logger.info(
-    #     f"Train Accuracy: {optimization_result['metrics']['train_accuracy']:.4f}"
-    # )
-    # logger.info(
-    #     f"Test Accuracy: {optimization_result['metrics']['test_accuracy']:.4f}"
-    # )
+    # train_acc = optimization_result['metrics']['train_accuracy']
+    # logger.info(f"Train Accuracy: {train_acc:.4f}")
+    # test_acc = optimization_result['metrics']['test_accuracy']
+    # logger.info(f"Test Accuracy: {test_acc:.4f}")
     # logger.info(f"\n🏆 Mejores parametros encontrados:")
     # for param, value in optimization_result['best_params'].items():
     #     logger.info(f"   {param}: {value}")

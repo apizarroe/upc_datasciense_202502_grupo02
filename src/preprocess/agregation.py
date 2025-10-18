@@ -1,4 +1,4 @@
-"""Módulo para crear características agregadas OPTIMIZADAS de clientes y productos."""
+"""Módulo para características agregadas de clientes y productos."""
 
 import logging
 
@@ -81,7 +81,7 @@ def create_product_features(df):
 
 
 def enrich_transaction_data(df, customer_features, product_features):
-    """Enriquecer datos de transacción con características agregadas OPTIMIZADAS."""
+    """Enriquecer datos con características agregadas."""
     logger.info("Enriqueciendo datos de transacción...")
 
     df_enriched = df.copy()
