@@ -7,6 +7,11 @@ scikit-learn==1.5.2
 jupyter==1.1.1
 pyarrow
 
+# API
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.2
+
 # Herramientas de desarrollo y calidad de código
 pre-commit==3.6.0
 black==24.3.0
