@@ -8,7 +8,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def clean_data(df):
+def clean_data(df):  # noqa: C901
     """Limpieza básica de los datos para predicción de Discount Applied."""
     df_clean = df.copy()
     logger.info("Iniciando limpieza de datos...")

@@ -195,7 +195,7 @@ def optimize_discount_model_hyperparameters(
         "ccp_alpha": [0.0, 0.001],  # Sin poda agresiva
     }
 
-    logger.info(f"\n📋 Grid de hiperparametros:")
+    logger.info("\n📋 Grid de hiperparametros:")
     for param, values in param_grid.items():
         logger.info(f"   - {param}: {values}")
 
@@ -236,7 +236,7 @@ def optimize_discount_model_hyperparameters(
     logger.info("\n" + "=" * 70)
     logger.info("✅ OPTIMIZACION COMPLETADA")
     logger.info("=" * 70)
-    logger.info(f"\n🏆 Mejores hiperparametros encontrados:")
+    logger.info("\n🏆 Mejores hiperparametros encontrados:")
     for param, value in grid_search.best_params_.items():
         logger.info(f"   - {param}: {value}")
 
@@ -248,7 +248,7 @@ def optimize_discount_model_hyperparameters(
     train_accuracy = accuracy_score(result["y_train"], y_pred_train)
     test_accuracy = accuracy_score(result["y_test"], y_pred_test)
 
-    logger.info(f"\n📊 Metricas del mejor modelo:")
+    logger.info("\n📊 Metricas del mejor modelo:")
     logger.info(f"   - CV Score: {grid_search.best_score_:.4f}")
     logger.info(f"   - Train Accuracy: {train_accuracy:.4f}")
     logger.info(f"   - Test Accuracy: {test_accuracy:.4f}")
@@ -256,7 +256,7 @@ def optimize_discount_model_hyperparameters(
     logger.info(f"   - Numero de hojas: {best_model.get_n_leaves()}")
 
     # Reporte de clasificacion detallado
-    logger.info(f"\n📈 Reporte de clasificacion (Test set):")
+    logger.info("\n📈 Reporte de clasificacion (Test set):")
     logger.info("\n" + classification_report(result["y_test"], y_pred_test))
 
     # Guardar modelo optimizado
@@ -338,7 +338,7 @@ def train_discount_applied_model(
     logger.info("\n" + "=" * 70)
     logger.info("🌳 ENTRENANDO MODELO: DISCOUNT APPLIED (ARBOL DE DECISION)")
     logger.info("=" * 70)
-    logger.info(f"\n📋 Hiperparametros configurados:")
+    logger.info("\n📋 Hiperparametros configurados:")
     logger.info(f"   - max_depth: {max_depth}")
     logger.info(f"   - min_samples_split: {min_samples_split}")
     logger.info(f"   - min_samples_leaf: {min_samples_leaf}")
