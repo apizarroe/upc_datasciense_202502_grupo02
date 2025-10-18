@@ -15,10 +15,7 @@ from preprocess.agregation import (  # noqa: E402
     enrich_transaction_data,
 )
 from preprocess.cleaning import clean_data  # noqa: E402
-from preprocess.preprocesing import (  # noqa: E402
-    prepare_features_target,
-    preprocess_for_regression,
-)
+from preprocess.preprocesing import preprocess_for_classification  # noqa: E402
 
 # Configurar logging
 logging.basicConfig(
@@ -61,49 +58,26 @@ def run_pipeline(input_file, output_dir="data/processed"):
 
         # 4. Preprocesamiento
         logger.info("\n⚙️ Realizando preprocesamiento...")
-        df_processed, label_encoders = preprocess_for_regression(df_enriched)
+        df_processed, label_encoders = preprocess_for_classification(
+            df_enriched
+        )
 
-        # Guardar datos procesados
+        # Guardar datos procesados para entrenamiento
         processed_path = os.path.join(output_dir, "data_processed.parquet")
         df_processed.to_parquet(processed_path, index=False)
         logger.info("✅ data_processed.parquet")
 
-        # 5. Preparar datos para entrenamiento
-        logger.info("\n🎯 Preparando datos para entrenamiento...")
-        X, y, feature_columns = prepare_features_target(
-            df_processed,
-            target_column="Total Spent",
-            exclude_columns=[
-                "Transaction ID",
-                "Customer ID",
-                "Transaction Date",
-                "Total Spent",
-            ],
-        )
-
-        # Crear dataset de entrenamiento (X + y)
-        training_data = X.copy()
-        training_data["Total_Spent"] = y
-
-        # Guardar datos de entrenamiento
-        training_path = os.path.join(output_dir, "data_training.parquet")
-        training_data.to_parquet(training_path, index=False)
-        logger.info("✅ data_training.parquet")
-
-        # 6. Resumen final
+        # 5. Resumen final
         logger.info("\n" + "=" * 50)
-        logger.info("✅ PIPELINE COMPLETADO EXITOSAMENTE!")
+        logger.info("✅ PIPELINE DE PREPROCESAMIENTO COMPLETADO!")
         logger.info("=" * 50)
         logger.info(f"📁 Archivos guardados en: {output_dir}")
         logger.info(" - data_cleaned.parquet")
         logger.info(" - data_processed.parquet")
-        logger.info(" - data_training.parquet")
 
         return {
             "df_clean": df_clean,
             "df_processed": df_processed,
-            "training_data": training_data,
-            "feature_columns": feature_columns,
             "label_encoders": label_encoders,
         }
 
