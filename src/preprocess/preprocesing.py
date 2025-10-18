@@ -1,13 +1,18 @@
 """Módulo para preprocesamiento OPTIMIZADO de datos (clasificación)."""
 
+import logging
+
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
+
+# Configurar logging
+logger = logging.getLogger(__name__)
 
 
 def preprocess_for_classification(df, target_column="Discount Applied"):
     """Preprocesamiento OPTIMIZADO para modelo de clasificación (descuento sí/no)."""
     df_processed = df.copy()
-    print("Preprocesamiento OPTIMIZADO para predicción de DESCUENTO...")
+    logger.info("Iniciando preprocesamiento para clasificación...")
 
     # 1. Asegurar que Discount Applied sea numérico (0/1)
     df_processed[target_column] = df_processed[target_column].astype(bool).astype(int)
@@ -24,7 +29,6 @@ def preprocess_for_classification(df, target_column="Discount Applied"):
 
     # 3. Características temporales
     if "Transaction Date" in df_processed.columns:
-        print("Extrayendo características de fecha...")
         df_processed["Transaction_Year"] = df_processed["Transaction Date"].dt.year
         df_processed["Transaction_Month"] = df_processed["Transaction Date"].dt.month
         df_processed["Transaction_Quarter"] = df_processed["Transaction Date"].dt.quarter
@@ -60,7 +64,11 @@ def preprocess_for_classification(df, target_column="Discount Applied"):
 
     df_processed[numeric_cols] = scaler.fit_transform(df_processed[numeric_cols])
 
-    print(f"Columnas escaladas: {len(numeric_cols)}")
-    print(f"Dataset después de preprocesamiento: {df_processed.shape}")
+    # Escalar datos de predicción con el mismo scaler
+    # if len(df_for_prediction) > 0:
+    #    df_for_prediction[numeric_cols] = scaler.transform(df_for_prediction[numeric_cols])
+
+    logger.info(f"Columnas escaladas: {len(numeric_cols)}")
+    logger.info(f"Preprocesamiento completado: {df_processed.shape}")
 
     return df_processed, label_encoders

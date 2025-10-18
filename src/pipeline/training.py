@@ -5,9 +5,15 @@ import os
 
 import joblib
 import pandas as pd
-from sklearn.linear_model import LinearRegression, LogisticRegression
-from sklearn.metrics import accuracy_score, mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    mean_squared_error,
+    r2_score,
+)
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.tree import DecisionTreeClassifier
 
 # Configurar logging
 logging.basicConfig(
@@ -137,22 +143,26 @@ def prepare_training_data(
 # =============================================================================
 
 
-def train_discount_applied_model(df_processed, test_size=0.2, max_iter=5000):
-    """Entrenar modelo de clasificacion para predecir Discount Applied.
+def optimize_discount_model_hyperparameters(
+    df_processed, test_size=0.2, cv=5, n_jobs=-1, verbose=2
+):
+    """Optimizar hiperparametros del modelo usando GridSearchCV.
 
     Args
     ----
         df_processed: DataFrame con datos preprocesados
         test_size: Proporcion de datos para test (default 0.2)
-        max_iter: Numero maximo de iteraciones para LogisticRegression
+        cv: Numero de folds para cross-validation (default 5)
+        n_jobs: Numero de trabajos en paralelo (-1 = todos los cores)
+        verbose: Nivel de verbosidad (0, 1, 2, 3)
 
     Returns
     -------
-        dict con model, metrics, y data splits
+        dict con best_model, best_params, cv_results, y metrics
 
     """
     logger.info("\n" + "=" * 70)
-    logger.info("🤖 ENTRENANDO MODELO: DISCOUNT APPLIED (CLASIFICACION)")
+    logger.info("🔍 OPTIMIZACION DE HIPERPARAMETROS - GRID SEARCH CV")
     logger.info("=" * 70)
 
     # Configurar parametros
@@ -173,11 +183,206 @@ def train_discount_applied_model(df_processed, test_size=0.2, max_iter=5000):
         test_size=test_size,
     )
 
+    # Definir el grid de hiperparametros a explorar
+    # Grid enfocado en encontrar el balance entre complejidad y generalizacion
+    param_grid = {
+        "max_depth": [5, 10, 15, 20, None],  # Rango medio-alto
+        "min_samples_split": [2, 5, 10, 15],  # Menos restrictivo
+        "min_samples_leaf": [1, 2, 5, 8],  # Menos restrictivo
+        "criterion": ["gini", "entropy"],
+        "max_features": [None, "sqrt"],  # Simplificado
+        "class_weight": [None, "balanced"],
+        "ccp_alpha": [0.0, 0.001],  # Sin poda agresiva
+    }
+
+    logger.info(f"\n📋 Grid de hiperparametros:")
+    for param, values in param_grid.items():
+        logger.info(f"   - {param}: {values}")
+
+    total_combinations = (
+        len(param_grid['max_depth']) *
+        len(param_grid['min_samples_split']) *
+        len(param_grid['min_samples_leaf']) *
+        len(param_grid['criterion']) *
+        len(param_grid['max_features']) *
+        len(param_grid['class_weight']) *
+        len(param_grid['ccp_alpha'])
+    )
+    logger.info(f"\n⏱️  Total de combinaciones a probar: {total_combinations}")
+
+    # Crear el modelo base
+    base_model = DecisionTreeClassifier(random_state=42)
+
+    # Configurar GridSearchCV
+    logger.info(f"\n🔄 Ejecutando Grid Search con {cv}-fold cross-validation...")
+    logger.info("   (Esto puede tomar varios minutos...)\n")
+
+    grid_search = GridSearchCV(
+        estimator=base_model,
+        param_grid=param_grid,
+        cv=cv,
+        scoring="accuracy",
+        n_jobs=n_jobs,
+        verbose=verbose,
+        return_train_score=True,
+    )
+
+    # Entrenar con grid search
+    grid_search.fit(result["X_train"], result["y_train"])
+
+    # Obtener mejores parametros
+    logger.info("\n" + "=" * 70)
+    logger.info("✅ OPTIMIZACION COMPLETADA")
+    logger.info("=" * 70)
+    logger.info(f"\n🏆 Mejores hiperparametros encontrados:")
+    for param, value in grid_search.best_params_.items():
+        logger.info(f"   - {param}: {value}")
+
+    # Evaluar el mejor modelo
+    best_model = grid_search.best_estimator_
+    y_pred_train = best_model.predict(result["X_train"])
+    y_pred_test = best_model.predict(result["X_test"])
+
+    train_accuracy = accuracy_score(result["y_train"], y_pred_train)
+    test_accuracy = accuracy_score(result["y_test"], y_pred_test)
+
+    logger.info(f"\n📊 Metricas del mejor modelo:")
+    logger.info(f"   - CV Score: {grid_search.best_score_:.4f}")
+    logger.info(f"   - Train Accuracy: {train_accuracy:.4f}")
+    logger.info(f"   - Test Accuracy: {test_accuracy:.4f}")
+    logger.info(f"   - Profundidad del arbol: {best_model.get_depth()}")
+    logger.info(f"   - Numero de hojas: {best_model.get_n_leaves()}")
+
+    # Reporte de clasificacion detallado
+    logger.info(f"\n📈 Reporte de clasificacion (Test set):")
+    logger.info("\n" + classification_report(result["y_test"], y_pred_test))
+
+    # Guardar modelo optimizado
+    logger.info("\n💾 Guardando modelo optimizado...")
+    model_dir = "data/models"
+    os.makedirs(model_dir, exist_ok=True)
+
+    model_path = os.path.join(model_dir, "discount_applied_model_optimized.pkl")
+    joblib.dump(best_model, model_path)
+    logger.info(f"✅ Modelo optimizado guardado en: {model_path}")
+
+    # Guardar mejores parametros
+    params_path = os.path.join(model_dir, "best_hyperparameters.pkl")
+    joblib.dump(grid_search.best_params_, params_path)
+    logger.info(f"✅ Mejores parametros guardados en: {params_path}")
+
+    # Guardar feature columns
+    feature_columns_path = os.path.join(
+        model_dir, "discount_applied_features.pkl"
+    )
+    joblib.dump(result["feature_columns"], feature_columns_path)
+
+    return {
+        "best_model": best_model,
+        "model_path": model_path,
+        "best_params": grid_search.best_params_,
+        "cv_score": grid_search.best_score_,
+        "cv_results": grid_search.cv_results_,
+        "metrics": {
+            "train_accuracy": train_accuracy,
+            "test_accuracy": test_accuracy,
+        },
+        "data": result,
+        "grid_search": grid_search,
+    }
+
+
+def train_discount_applied_model(
+    df_processed,
+    test_size=0.2,
+    # Hiperparámetros del árbol de decisión (valores balanceados por defecto)
+    max_depth=15,  # Balance entre complejidad y generalizacion
+    min_samples_split=10,  # Menos restrictivo
+    min_samples_leaf=5,  # Menos restrictivo
+    max_features=None,  # Usar todas las features
+    criterion="gini",  # Gini generalmente funciona bien
+    splitter="best",  # Mejor split en cada nodo
+    max_leaf_nodes=None,  # Sin limite de hojas
+    min_impurity_decrease=0.0,  # Sin umbral minimo
+    class_weight="balanced",  # Balancear clases desbalanceadas
+    ccp_alpha=0.0,  # Sin poda inicial
+    random_state=42,
+):
+    """Entrenar modelo de clasificacion para predecir Discount Applied.
+
+    Args
+    ----
+        df_processed: DataFrame con datos preprocesados
+        test_size: Proporcion de datos para test (default 0.2)
+        max_depth: Profundidad maxima del arbol (None = sin limite)
+        min_samples_split: Minimo de muestras requeridas para dividir nodo (default 2)
+        min_samples_leaf: Minimo de muestras requeridas en nodo hoja (default 1)
+        max_features: Numero maximo de features a considerar en cada split (None, 'sqrt', 'log2', int, float)
+        criterion: Funcion para medir calidad del split ('gini' o 'entropy')
+        splitter: Estrategia para dividir nodos ('best' o 'random')
+        max_leaf_nodes: Numero maximo de nodos hoja (None = sin limite)
+        min_impurity_decrease: Umbral minimo de reduccion de impureza para hacer split
+        class_weight: Pesos de clases ('balanced', None, dict)
+        ccp_alpha: Parametro de poda de complejidad (0.0 = sin poda)
+        random_state: Semilla para reproducibilidad
+
+    Returns
+    -------
+        dict con model, metrics, y data splits
+
+    """
+    logger.info("\n" + "=" * 70)
+    logger.info("🌳 ENTRENANDO MODELO: DISCOUNT APPLIED (ARBOL DE DECISION)")
+    logger.info("=" * 70)
+    logger.info(f"\n📋 Hiperparametros configurados:")
+    logger.info(f"   - max_depth: {max_depth}")
+    logger.info(f"   - min_samples_split: {min_samples_split}")
+    logger.info(f"   - min_samples_leaf: {min_samples_leaf}")
+    logger.info(f"   - max_features: {max_features}")
+    logger.info(f"   - criterion: {criterion}")
+    logger.info(f"   - splitter: {splitter}")
+    logger.info(f"   - max_leaf_nodes: {max_leaf_nodes}")
+    logger.info(f"   - min_impurity_decrease: {min_impurity_decrease}")
+    logger.info(f"   - class_weight: {class_weight}")
+    logger.info(f"   - ccp_alpha: {ccp_alpha}")
+
+    # Configurar parametros
+    target_column = "Discount Applied"
+    exclude_columns = [
+        "Transaction ID",
+        "Customer ID",
+        "Transaction Date",
+        "Discount Applied",
+    ]
+
+    # Preparar datos
+    result = prepare_training_data(
+        df_processed,
+        target_column=target_column,
+        exclude_columns=exclude_columns,
+        output_dir="data/models/discount_applied",
+        test_size=test_size,
+    )
+
     # Entrenar modelo
-    logger.info("\n4️⃣ Entrenando modelo de Regresion Logistica...")
-    model = LogisticRegression(max_iter=max_iter, random_state=42)
+    logger.info("\n4️⃣ Entrenando modelo de Arbol de Decision...")
+    model = DecisionTreeClassifier(
+        max_depth=max_depth,
+        min_samples_split=min_samples_split,
+        min_samples_leaf=min_samples_leaf,
+        max_features=max_features,
+        criterion=criterion,
+        splitter=splitter,
+        max_leaf_nodes=max_leaf_nodes,
+        min_impurity_decrease=min_impurity_decrease,
+        class_weight=class_weight,
+        ccp_alpha=ccp_alpha,
+        random_state=random_state,
+    )
     model.fit(result["X_train"], result["y_train"])
     logger.info("✅ Modelo entrenado exitosamente")
+    logger.info(f"   - Profundidad del arbol: {model.get_depth()}")
+    logger.info(f"   - Numero de hojas: {model.get_n_leaves()}")
 
     # Evaluar modelo
     logger.info("\n5️⃣ Evaluando modelo...")
@@ -371,7 +576,7 @@ def predict_discount_applied(model, features):
 
     Args
     ----
-        model: Modelo entrenado de LogisticRegression
+        model: Modelo entrenado (DecisionTreeClassifier)
         features: DataFrame o array con caracteristicas
 
     Returns
@@ -386,6 +591,7 @@ def predict_discount_applied(model, features):
         "discount_applied": bool(prediction),
         "probability_false": float(probability[0]),
         "probability_true": float(probability[1]),
+        "confidence": float(max(probability)),  # Confianza de la prediccion
     }
 
 
@@ -420,10 +626,19 @@ if __name__ == "__main__":
     df_processed = pd.read_parquet(input_file)
 
     # =========================================================================
-    # OPCION 1: Entrenar modelo de Discount Applied
+    # ENTRENAR MODELO CON PARAMETROS CONFIGURABLES (para API)
     # =========================================================================
     discount_result = train_discount_applied_model(
-        df_processed, test_size=0.2, max_iter=5000
+        df_processed,
+        test_size=0.2,
+        # Parametros configurables - ajusta segun necesites:
+        max_depth=15,
+        min_samples_split=10,
+        min_samples_leaf=5,
+        max_features=None,
+        criterion="gini",
+        class_weight="balanced",
+        ccp_alpha=0.0,
     )
 
     logger.info("\n" + "=" * 70)
@@ -435,6 +650,33 @@ if __name__ == "__main__":
     logger.info(
         f"Test Accuracy: {discount_result['metrics']['test_accuracy']:.4f}"
     )
+
+    # =========================================================================
+    # OPCION AVANZADA: Optimizar hiperparametros con GridSearchCV (comentado)
+    # =========================================================================
+    # Descomenta si quieres ejecutar busqueda automatica de mejores parametros:
+    #
+    # optimization_result = optimize_discount_model_hyperparameters(
+    #     df_processed,
+    #     test_size=0.2,
+    #     cv=5,
+    #     n_jobs=-1,
+    #     verbose=2,
+    # )
+    #
+    # logger.info("\n" + "=" * 70)
+    # logger.info("✅ OPTIMIZACION COMPLETADA")
+    # logger.info("=" * 70)
+    # logger.info(f"CV Score: {optimization_result['cv_score']:.4f}")
+    # logger.info(
+    #     f"Train Accuracy: {optimization_result['metrics']['train_accuracy']:.4f}"
+    # )
+    # logger.info(
+    #     f"Test Accuracy: {optimization_result['metrics']['test_accuracy']:.4f}"
+    # )
+    # logger.info(f"\n🏆 Mejores parametros encontrados:")
+    # for param, value in optimization_result['best_params'].items():
+    #     logger.info(f"   {param}: {value}")
 
     # =========================================================================
     # OPCION 2: Entrenar modelo de Total Spent (comentado por defecto)

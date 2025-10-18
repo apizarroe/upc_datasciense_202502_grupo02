@@ -1,11 +1,16 @@
 """Módulo para crear características agregadas OPTIMIZADAS de clientes y productos."""
 
+import logging
+
 import pandas as pd
+
+# Configurar logging
+logger = logging.getLogger(__name__)
 
 
 def create_customer_features(df):
     """Crear características agregadas por cliente OPTIMIZADAS."""
-    print("Creando características de cliente OPTIMIZADAS...")
+    logger.info("Creando características de cliente...")
 
     # SOLO características realmente útiles para predecir Total Spent
     customer_features = (
@@ -30,12 +35,13 @@ def create_customer_features(df):
         pd.to_datetime("today") - df.groupby("Customer ID")["Transaction Date"].max()
     ).dt.days
 
+    logger.info(f"Características de cliente creadas: {customer_features.shape}")
     return customer_features.reset_index()
 
 
 def create_product_features(df):
     """Crear características agregadas por producto/categoría OPTIMIZADAS."""
-    print("Creando características de producto OPTIMIZADAS...")
+    logger.info("Creando características de producto...")
 
     # SOLO características relevantes para predecir Total Spent
     product_features = (
@@ -61,12 +67,13 @@ def create_product_features(df):
         product_features["Product_Transaction_Count"] / total_transactions
     )
 
+    logger.info(f"Características de producto creadas: {product_features.shape}")
     return product_features.reset_index()
 
 
 def enrich_transaction_data(df, customer_features, product_features):
     """Enriquecer datos de transacción con características agregadas OPTIMIZADAS."""
-    print("Enriqueciendo datos de transacción OPTIMIZADO...")
+    logger.info("Enriqueciendo datos de transacción...")
 
     df_enriched = df.copy()
 
@@ -84,5 +91,5 @@ def enrich_transaction_data(df, customer_features, product_features):
         how="left"
     )
 
-    print(f"Dataset enriquecido: {df_enriched.shape}")
+    logger.info(f"Dataset enriquecido: {df_enriched.shape}")
     return df_enriched

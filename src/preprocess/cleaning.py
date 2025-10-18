@@ -1,17 +1,22 @@
 """Módulo para limpieza y validación de datos de transacciones."""
 
+import logging
+
 import pandas as pd
+
+# Configurar logging
+logger = logging.getLogger(__name__)
 
 
 def clean_data(df):
     """Limpieza básica de los datos para predicción de Discount Applied."""
     df_clean = df.copy()
-    print("Iniciando limpieza de datos...")
+    logger.info("Iniciando limpieza de datos...")
 
     # 1. Manejo de valores nulos
-    print("Manejo de valores nulos...")
     rows_with_nulls_before = df_clean.isnull().any(axis=1).sum()
-    print(f"Registros con nulos antes de imputación: {rows_with_nulls_before}")
+    if rows_with_nulls_before > 0:
+        logger.info(f"Registros con nulos: {rows_with_nulls_before}")
 
     # Para Discount Applied, llenar False donde sea nulo
     if "Discount Applied" in df_clean.columns:
@@ -38,10 +43,13 @@ def clean_data(df):
         )["Item"].transform(lambda x: x.mode().iloc[0] if not x.mode().empty else pd.NA)
 
     rows_with_nulls_after = df_clean.isnull().any(axis=1).sum()
-    print(f"Registros con nulos después de imputación: {rows_with_nulls_after}")
+    if rows_with_nulls_after > 0:
+        logger.warning(f"Registros con nulos después de imputación: {rows_with_nulls_after}")
 
     # 2. Eliminar duplicados
-    print("Eliminando duplicados...")
+    duplicates = df_clean.duplicated(subset=["Transaction ID"]).sum()
+    if duplicates > 0:
+        logger.info(f"Duplicados eliminados: {duplicates}")
     df_clean = df_clean.drop_duplicates(subset=["Transaction ID"])
 
     # 3. Convertir fecha a datetime
@@ -49,12 +57,14 @@ def clean_data(df):
         df_clean["Transaction Date"] = pd.to_datetime(df_clean["Transaction Date"], errors="coerce")
 
     # 4. Validar consistencia: Total Spent ≈ Price Per Unit * Quantity
-    print("Validando consistencia de datos...")
     if {"Total Spent", "Price Per Unit", "Quantity"}.issubset(df_clean.columns):
         calculated_total = df_clean["Price Per Unit"] * df_clean["Quantity"]
         discrepancy = abs(df_clean["Total Spent"] - calculated_total)
         mask_inconsistent = discrepancy > (df_clean["Total Spent"] * 0.01)
+        inconsistent_count = mask_inconsistent.sum()
+        if inconsistent_count > 0:
+            logger.info(f"Registros con inconsistencias corregidos: {inconsistent_count}")
         df_clean.loc[mask_inconsistent, "Total Spent"] = calculated_total[mask_inconsistent]
 
-    print(f"Dataset después de limpieza: {df_clean.shape}")
+    logger.info(f"Limpieza completada: {df_clean.shape}")
     return df_clean
