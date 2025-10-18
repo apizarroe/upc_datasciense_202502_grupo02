@@ -3,6 +3,7 @@
 import logging
 import os
 from datetime import datetime
+from typing import Optional, Union
 
 import joblib
 import pandas as pd
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 
-def load_model_artifacts(model_dir="data/models"):
+def load_model_artifacts(model_dir: str = "data/models") -> dict:
     """Cargar modelo y artefactos necesarios para prediccion.
 
     Args
@@ -61,7 +62,9 @@ def load_model_artifacts(model_dir="data/models"):
 # =============================================================================
 
 
-def preprocess_for_prediction(data, feature_columns):
+def preprocess_for_prediction(
+    data: Union[dict, pd.DataFrame], feature_columns: list
+) -> pd.DataFrame:
     """Preparar datos preprocesados para prediccion.
 
     IMPORTANTE: Esta funcion asume que los datos YA ESTAN preprocesados
@@ -110,7 +113,9 @@ def preprocess_for_prediction(data, feature_columns):
 # =============================================================================
 
 
-def predict_discount_applied(data, model_dir="data/models"):
+def predict_discount_applied(
+    data: Union[dict, pd.DataFrame], model_dir: str = "data/models"
+) -> dict:
     """Predecir si se aplicara descuento (para uso en API).
 
     Args
@@ -176,7 +181,9 @@ def predict_discount_applied(data, model_dir="data/models"):
     return result
 
 
-def predict_batch(data_list, model_dir="data/models", save_results=True):
+def predict_batch(
+    data_list: list, model_dir: str = "data/models", save_results: bool = True
+) -> list:
     """Predecir multiples transacciones en batch.
 
     Args
@@ -242,11 +249,11 @@ def predict_batch(data_list, model_dir="data/models", save_results=True):
 
 
 def predict_from_parquet(
-    parquet_path="data/processed/data_processed.parquet",
-    model_dir="data/models",
-    row_index=None,
-    save_results=True,
-):
+    parquet_path: str = "data/processed/data_processed.parquet",
+    model_dir: str = "data/models",
+    row_index: Optional[int] = None,
+    save_results: bool = True,
+) -> Union[dict, list]:
     """Predecir desde archivo parquet (simula llamada de API).
 
     Args
@@ -289,7 +296,7 @@ def predict_from_parquet(
         )
 
 
-def predict_from_dict(data_dict, model_dir="data/models"):
+def predict_from_dict(data_dict: dict, model_dir: str = "data/models") -> dict:
     """Predecir desde diccionario (simula request de API REST).
 
     Args
@@ -337,7 +344,6 @@ if __name__ == "__main__":
 
         df_processed = pd.read_parquet(parquet_path)
         df_processed = df_processed.drop(columns=["Discount Applied"])
-        df_processed.info()
 
         result = predict_from_parquet(
             parquet_path=parquet_path,
@@ -346,14 +352,17 @@ if __name__ == "__main__":
         )
 
         logger.info("\n📊 Respuesta de API (JSON):")
+        # Type narrowing: en este contexto result es dict
+        assert isinstance(result, dict)
         logger.info(f"   discount_applied: {result['discount_applied']}")
         prob_discount = result["probability_discount"]
         logger.info(f"   probability_discount: {prob_discount:.4f}")
-        prob_no_discount = result["probability_no_discount"]
-        logger.info(f"   probability_no_discount: {prob_no_discount:.4f}")
+        prob_no = result["probability_no_discount"]
+        logger.info(f"   probability_no_discount: {prob_no:.4f}")
         logger.info(f"   confidence: {result['confidence']:.4f}")
         logger.info(f"   timestamp: {result['timestamp']}")
-        logger.info(f"   model_type: {result['model_info']['model_type']}")
+        model_info = result["model_info"]
+        logger.info(f"   model_type: {model_info['model_type']}")
 
         # Ejemplo 2: Prediccion batch (simula endpoint /predict/batch)
         logger.info("\n2️⃣ Prediccion batch (primeras 10 filas)...")

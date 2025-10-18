@@ -2,6 +2,7 @@
 
 import logging
 import os
+from typing import Optional, Tuple
 
 import joblib
 import pandas as pd
@@ -28,8 +29,10 @@ logger = logging.getLogger(__name__)
 
 
 def prepare_features_target(
-    df, target_column="Total Spent", exclude_columns=None
-):
+    df: pd.DataFrame,
+    target_column: str = "Total Spent",
+    exclude_columns: Optional[list] = None,
+) -> Tuple[pd.DataFrame, pd.Series, list]:
     """Preparar caracteristicas (X) y variable objetivo (y) para modelo."""
     if exclude_columns is None:
         exclude_columns = [
@@ -59,7 +62,12 @@ def prepare_features_target(
     return X, y, feature_columns
 
 
-def split_data(X, y, test_size=0.2, random_state=42):
+def split_data(
+    X: pd.DataFrame,
+    y: pd.Series,
+    test_size: float = 0.2,
+    random_state: int = 42,
+) -> Tuple:
     """Dividir datos en train/test (80/20)."""
     logger.info(
         f"\n📊 Dividiendo datos (train: {(1-test_size)*100:.0f}%, "
@@ -78,12 +86,12 @@ def split_data(X, y, test_size=0.2, random_state=42):
 
 
 def prepare_training_data(
-    df_processed,
-    target_column="Total Spent",
-    exclude_columns=None,
-    output_dir="data/processed",
-    test_size=0.2,
-):
+    df_processed: pd.DataFrame,
+    target_column: str = "Total Spent",
+    exclude_columns: Optional[list] = None,
+    output_dir: str = "data/processed",
+    test_size: float = 0.2,
+) -> dict:
     """Preparar datos para entrenamiento con division train/test.
 
     Args
@@ -144,8 +152,12 @@ def prepare_training_data(
 
 
 def optimize_discount_model_hyperparameters(
-    df_processed, test_size=0.2, cv=5, n_jobs=-1, verbose=2
-):
+    df_processed: pd.DataFrame,
+    test_size: float = 0.2,
+    cv: int = 5,
+    n_jobs: int = -1,
+    verbose: int = 2,
+) -> dict:
     """Optimizar hiperparametros del modelo usando GridSearchCV.
 
     Args
@@ -184,8 +196,8 @@ def optimize_discount_model_hyperparameters(
     )
 
     # Definir el grid de hiperparametros a explorar
-    # Grid enfocado en encontrar el balance entre complejidad y generalizacion
-    param_grid = {
+    # Grid enfocado en encontrar balance entre complejidad y generalizacion
+    param_grid: dict = {
         "max_depth": [5, 10, 15, 20, None],  # Rango medio-alto
         "min_samples_split": [2, 5, 10, 15],  # Menos restrictivo
         "min_samples_leaf": [1, 2, 5, 8],  # Menos restrictivo
@@ -297,21 +309,22 @@ def optimize_discount_model_hyperparameters(
 
 
 def train_discount_applied_model(
-    df_processed,
-    test_size=0.2,
-    # Hiperparámetros del árbol de decisión (valores balanceados por defecto)
-    max_depth=15,  # Balance entre complejidad y generalizacion
-    min_samples_split=10,  # Menos restrictivo
-    min_samples_leaf=5,  # Menos restrictivo
-    max_features=None,  # Usar todas las features
-    criterion="gini",  # Gini generalmente funciona bien
-    splitter="best",  # Mejor split en cada nodo
-    max_leaf_nodes=None,  # Sin limite de hojas
-    min_impurity_decrease=0.0,  # Sin umbral minimo
-    class_weight="balanced",  # Balancear clases desbalanceadas
-    ccp_alpha=0.0,  # Sin poda inicial
-    random_state=42,
-):
+    df_processed: pd.DataFrame,
+    test_size: float = 0.2,
+    # Hiperparámetros del árbol de decisión
+    # (valores balanceados por defecto)
+    max_depth: Optional[int] = 15,  # Balance complejidad/generalizacion
+    min_samples_split: int = 10,  # Menos restrictivo
+    min_samples_leaf: int = 5,  # Menos restrictivo
+    max_features: Optional[str] = None,  # Usar todas las features
+    criterion: str = "gini",  # Gini generalmente funciona bien
+    splitter: str = "best",  # Mejor split en cada nodo
+    max_leaf_nodes: Optional[int] = None,  # Sin limite de hojas
+    min_impurity_decrease: float = 0.0,  # Sin umbral minimo
+    class_weight: Optional[str] = "balanced",  # Balancear clases
+    ccp_alpha: float = 0.0,  # Sin poda inicial
+    random_state: int = 42,
+) -> dict:
     """Entrenar modelo de clasificacion para predecir Discount Applied.
 
     Args
@@ -432,7 +445,9 @@ def train_discount_applied_model(
     }
 
 
-def train_total_spent_model(df_processed, test_size=0.2):
+def train_total_spent_model(
+    df_processed: pd.DataFrame, test_size: float = 0.2
+) -> dict:
     """Entrenar modelo de regresion para predecir Total Spent.
 
     Args
@@ -521,7 +536,9 @@ def train_total_spent_model(df_processed, test_size=0.2):
 # =============================================================================
 
 
-def load_discount_applied_model(model_dir="data/models"):
+def load_discount_applied_model(
+    model_dir: str = "data/models",
+) -> Tuple[DecisionTreeClassifier, list]:
     """Cargar modelo de Discount Applied desde archivo.
 
     Args
@@ -548,7 +565,9 @@ def load_discount_applied_model(model_dir="data/models"):
     return model, feature_columns
 
 
-def load_total_spent_model(model_dir="data/models"):
+def load_total_spent_model(
+    model_dir: str = "data/models",
+) -> Tuple[LinearRegression, list]:
     """Cargar modelo de Total Spent desde archivo.
 
     Args
@@ -580,7 +599,9 @@ def load_total_spent_model(model_dir="data/models"):
 # =============================================================================
 
 
-def predict_discount_applied(model, features):
+def predict_discount_applied(
+    model: DecisionTreeClassifier, features: pd.DataFrame
+) -> dict:
     """Predecir si se aplicara descuento (para API).
 
     Args
@@ -604,7 +625,9 @@ def predict_discount_applied(model, features):
     }
 
 
-def predict_total_spent(model, features):
+def predict_total_spent(
+    model: LinearRegression, features: pd.DataFrame
+) -> dict:
     """Predecir el total gastado (para API).
 
     Args
