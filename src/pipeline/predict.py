@@ -352,14 +352,19 @@ if __name__ == "__main__":
         )
 
         logger.info("\n📊 Respuesta de API (JSON):")
-        logger.info(f"   discount_applied: {result['discount_applied']}")
-        prob_discount = result["probability_discount"]
+        # type: ignore comentarios para dict access en Union type
+        discount = result['discount_applied']  # type: ignore
+        logger.info(f"   discount_applied: {discount}")
+        prob_discount = result["probability_discount"]  # type: ignore
         logger.info(f"   probability_discount: {prob_discount:.4f}")
-        prob_no_discount = result["probability_no_discount"]
-        logger.info(f"   probability_no_discount: {prob_no_discount:.4f}")
-        logger.info(f"   confidence: {result['confidence']:.4f}")
-        logger.info(f"   timestamp: {result['timestamp']}")
-        logger.info(f"   model_type: {result['model_info']['model_type']}")
+        prob_no = result["probability_no_discount"]  # type: ignore
+        logger.info(f"   probability_no_discount: {prob_no:.4f}")
+        confidence = result['confidence']  # type: ignore
+        logger.info(f"   confidence: {confidence:.4f}")
+        timestamp = result['timestamp']  # type: ignore
+        logger.info(f"   timestamp: {timestamp}")
+        model_info = result['model_info']  # type: ignore
+        logger.info(f"   model_type: {model_info['model_type']}")
 
         # Ejemplo 2: Prediccion batch (simula endpoint /predict/batch)
         logger.info("\n2️⃣ Prediccion batch (primeras 10 filas)...")

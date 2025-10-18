@@ -150,17 +150,18 @@ def test_with_real_data() -> None:  # noqa: C901
             confidence = pred["confidence"]
 
             if y_true is not None:
-                actual = bool(y_true[idx])
-                match = "✅" if actual == predicted else "❌"
-                if actual == predicted:
+                actual_bool = bool(y_true[idx])
+                actual_str = str(actual_bool)
+                match = "✅" if actual_bool == predicted else "❌"
+                if actual_bool == predicted:
                     correct_predictions += 1
             else:
-                actual = "N/A"
+                actual_str = "N/A"
                 match = "-"
 
             print(
                 f"   {idx:<4} {str(predicted):<12} {confidence:<12.2%} "
-                f"{str(actual):<12} {match:<8}"
+                f"{actual_str:<12} {match:<8}"
             )
 
         if y_true is not None:

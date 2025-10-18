@@ -196,8 +196,8 @@ def optimize_discount_model_hyperparameters(
     )
 
     # Definir el grid de hiperparametros a explorar
-    # Grid enfocado en encontrar el balance entre complejidad y generalizacion
-    param_grid = {
+    # Grid enfocado en encontrar balance entre complejidad y generalizacion
+    param_grid: dict = {
         "max_depth": [5, 10, 15, 20, None],  # Rango medio-alto
         "min_samples_split": [2, 5, 10, 15],  # Menos restrictivo
         "min_samples_leaf": [1, 2, 5, 8],  # Menos restrictivo
