@@ -211,10 +211,8 @@ def main() -> None:
     print("🧪 TESTING API DE PREDICCION DE DESCUENTOS - TESTS BASICOS")
     print("=" * 70)
     print(f"\nAPI URL: {API_URL}")
-    print(
-        "\n⚠️  Asegúrate de que la API esté corriendo "
-        "(python run_api.py)"
-    )
+    msg = "\n⚠️  Asegúrate de que la API esté corriendo (python run_api.py)"
+    print(msg)
 
     results = []
 

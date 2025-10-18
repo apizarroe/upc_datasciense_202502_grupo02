@@ -1,7 +1,7 @@
 """Script para probar la API usando datos reales del dataset procesado."""
 
 import os
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Tuple
 
 import pandas as pd
 import requests
@@ -41,8 +41,7 @@ def load_sample_data(
 
     except FileNotFoundError:
         print(
-            "❌ Error: No se encontró "
-            "data/processed/data_processed.parquet"
+            "❌ Error: No se encontró " "data/processed/data_processed.parquet"
         )
         print("   Ejecuta primero el preprocesamiento de datos")
         return None, None

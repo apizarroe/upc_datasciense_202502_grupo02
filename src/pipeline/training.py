@@ -220,9 +220,7 @@ def optimize_discount_model_hyperparameters(
         * len(param_grid["class_weight"])
         * len(param_grid["ccp_alpha"])
     )
-    logger.info(
-        f"\n⏱️  Total de combinaciones a probar: {total_combinations}"
-    )
+    logger.info(f"\n⏱️  Total de combinaciones a probar: {total_combinations}")
 
     # Crear el modelo base
     base_model = DecisionTreeClassifier(random_state=42)

@@ -26,19 +26,17 @@ def create_customer_features(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Renombrar columnas
-    customer_features.columns = pd.Index(
-        [
-            "Customer_Transaction_Count",
-            "Customer_Avg_Spent",
-            "Customer_Discount_Frequency",
-        ]
-    )
+    new_cols = [
+        "Customer_Transaction_Count",
+        "Customer_Avg_Spent",
+        "Customer_Discount_Frequency",
+    ]
+    customer_features.columns = new_cols  # type: ignore[assignment]
 
     # Solo una métrica adicional importante
     max_dates = df.groupby("Customer ID")["Transaction Date"].max()
     today = pd.Timestamp.now()
-    recency = today - max_dates  # type: ignore[operator]
-    customer_features["Customer_Recency"] = recency.dt.days
+    customer_features["Customer_Recency"] = (today - max_dates).dt.days
 
     logger.info(
         f"Características de cliente creadas: {customer_features.shape}"
@@ -64,13 +62,12 @@ def create_product_features(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Renombrar columnas
-    product_features.columns = pd.Index(
-        [
-            "Product_Transaction_Count",
-            "Product_Avg_Price",
-            "Product_Discount_Rate",
-        ]
-    )
+    new_prod_cols = [
+        "Product_Transaction_Count",
+        "Product_Avg_Price",
+        "Product_Discount_Rate",
+    ]
+    product_features.columns = new_prod_cols  # type: ignore[assignment]
 
     # Solo una métrica adicional importante
     total_transactions = product_features["Product_Transaction_Count"].sum()
