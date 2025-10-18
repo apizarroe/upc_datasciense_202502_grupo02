@@ -58,7 +58,9 @@ def run_pipeline(input_file, output_dir="data/processed"):
 
         # 4. Preprocesamiento
         logger.info("\n⚙️ Realizando preprocesamiento...")
-        df_processed, label_encoders = preprocess_for_classification(df_enriched)
+        df_processed, label_encoders = preprocess_for_classification(
+            df_enriched
+        )
 
         # Guardar datos procesados para entrenamiento
         processed_path = os.path.join(output_dir, "data_processed.parquet")

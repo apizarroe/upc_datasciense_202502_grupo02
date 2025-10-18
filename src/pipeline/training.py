@@ -200,13 +200,13 @@ def optimize_discount_model_hyperparameters(
         logger.info(f"   - {param}: {values}")
 
     total_combinations = (
-        len(param_grid['max_depth']) *
-        len(param_grid['min_samples_split']) *
-        len(param_grid['min_samples_leaf']) *
-        len(param_grid['criterion']) *
-        len(param_grid['max_features']) *
-        len(param_grid['class_weight']) *
-        len(param_grid['ccp_alpha'])
+        len(param_grid["max_depth"])
+        * len(param_grid["min_samples_split"])
+        * len(param_grid["min_samples_leaf"])
+        * len(param_grid["criterion"])
+        * len(param_grid["max_features"])
+        * len(param_grid["class_weight"])
+        * len(param_grid["ccp_alpha"])
     )
     logger.info(f"\n⏱️  Total de combinaciones a probar: {total_combinations}")
 
@@ -214,7 +214,9 @@ def optimize_discount_model_hyperparameters(
     base_model = DecisionTreeClassifier(random_state=42)
 
     # Configurar GridSearchCV
-    logger.info(f"\n🔄 Ejecutando Grid Search con {cv}-fold cross-validation...")
+    logger.info(
+        f"\n🔄 Ejecutando Grid Search con {cv}-fold cross-validation..."
+    )
     logger.info("   (Esto puede tomar varios minutos...)\n")
 
     grid_search = GridSearchCV(
@@ -262,7 +264,9 @@ def optimize_discount_model_hyperparameters(
     model_dir = "data/models"
     os.makedirs(model_dir, exist_ok=True)
 
-    model_path = os.path.join(model_dir, "discount_applied_model_optimized.pkl")
+    model_path = os.path.join(
+        model_dir, "discount_applied_model_optimized.pkl"
+    )
     joblib.dump(best_model, model_path)
     logger.info(f"✅ Modelo optimizado guardado en: {model_path}")
 

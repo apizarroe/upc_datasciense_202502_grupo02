@@ -1,6 +1,5 @@
 """Script para probar la API usando datos reales del dataset procesado."""
 
-import json
 import os
 
 import pandas as pd
@@ -17,7 +16,8 @@ def load_sample_data(n_samples=5):
 
         # Ruta relativa desde src/api/tests/ a data/processed/
         data_path = os.path.join(
-            os.path.dirname(__file__), "../../../data/processed/data_processed.parquet"
+            os.path.dirname(__file__),
+            "../../../data/processed/data_processed.parquet",
         )
         df = pd.read_parquet(data_path)
 
@@ -45,7 +45,7 @@ def load_sample_data(n_samples=5):
         return None, None
 
 
-def test_with_real_data():
+def test_with_real_data():  # noqa: C901
     """Probar la API con datos reales."""
     print("\n" + "=" * 70)
     print("🧪 TEST API CON DATOS REALES")
@@ -86,15 +86,19 @@ def test_with_real_data():
 
     first_row = sample_df.iloc[0].to_dict()
 
-    response = requests.post(f"{API_URL}/predict", json={"features": first_row})
+    response = requests.post(
+        f"{API_URL}/predict", json={"features": first_row}
+    )
 
     if response.status_code == 200:
         result = response.json()
-        print(f"\n✅ Predicción exitosa:")
+        print("\n✅ Predicción exitosa:")
         print(f"   Descuento Aplicado: {result['discount_applied']}")
         print(f"   Confianza: {result['confidence']:.2%}")
         print(f"   Prob. Descuento: {result['probability_discount']:.4f}")
-        print(f"   Prob. No Descuento: {result['probability_no_discount']:.4f}")
+        print(
+            f"   Prob. No Descuento: {result['probability_no_discount']:.4f}"
+        )
 
         if y_true is not None:
             actual = bool(y_true[0])
@@ -114,19 +118,23 @@ def test_with_real_data():
 
     batch_data = sample_df.to_dict("records")
 
-    response = requests.post(f"{API_URL}/predict/batch", json={"data_list": batch_data})
+    response = requests.post(
+        f"{API_URL}/predict/batch", json={"data_list": batch_data}
+    )
 
     if response.status_code == 200:
         result = response.json()
-        print(f"\n✅ Predicción batch exitosa:")
+        print("\n✅ Predicción batch exitosa:")
         print(f"   Total: {result['total']}")
         print(f"   Con descuento: {result['discount_count']}")
         print(f"   Sin descuento: {result['no_discount_count']}")
 
-        print(f"\n   Detalle de predicciones:")
-        print(
-            f"   {'#':<4} {'Predicción':<12} {'Confianza':<12} {'Real':<12} {'Match':<8}"
+        print("\n   Detalle de predicciones:")
+        header = (
+            f"   {'#':<4} {'Predicción':<12} {'Confianza':<12} "
+            f"{'Real':<12} {'Match':<8}"
         )
+        print(header)
         print(f"   {'-'*4} {'-'*12} {'-'*12} {'-'*12} {'-'*8}")
 
         correct_predictions = 0
@@ -169,12 +177,12 @@ def test_with_real_data():
 
     if response.status_code == 200:
         info = response.json()
-        print(f"\n✅ Información del modelo:")
+        print("\n✅ Información del modelo:")
         print(f"   Tipo: {info['model_type']}")
         print(f"   Features: {info['n_features']}")
         print(f"   Profundidad: {info['model_depth']}")
         print(f"   Hojas: {info['n_leaves']}")
-        print(f"\n   Primeras 10 features esperadas:")
+        print("\n   Primeras 10 features esperadas:")
         for i, feature in enumerate(info["feature_columns"], 1):
             print(f"      {i}. {feature}")
     else:

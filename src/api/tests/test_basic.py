@@ -36,7 +36,7 @@ def test_model_info():
         print(f"Number of Features: {data['n_features']}")
         print(f"Model Depth: {data['model_depth']}")
         print(f"Number of Leaves: {data['n_leaves']}")
-        print(f"\nFirst 10 Features:")
+        print("\nFirst 10 Features:")
         for i, feature in enumerate(data["feature_columns"], 1):
             print(f"  {i}. {feature}")
     else:
@@ -83,7 +83,7 @@ def test_single_prediction():
         "Payment Method_2": 1,
     }
 
-    print(f"\nRequest Features:")
+    print("\nRequest Features:")
     print(json.dumps(sample_features, indent=2))
 
     response = requests.post(
@@ -94,10 +94,11 @@ def test_single_prediction():
 
     if response.status_code == 200:
         result = response.json()
-        print(f"\nPrediction Results:")
+        print("\nPrediction Results:")
         print(f"  Discount Applied: {result['discount_applied']}")
         print(f"  Prediction: {result['prediction']}")
-        print(f"  Probability No Discount: {result['probability_no_discount']:.4f}")
+        prob_no_discount = result["probability_no_discount"]
+        print(f"  Probability No Discount: {prob_no_discount:.4f}")
         print(f"  Probability Discount: {result['probability_discount']:.4f}")
         print(f"  Confidence: {result['confidence']:.2%}")
         print(f"  Timestamp: {result['timestamp']}")
@@ -187,12 +188,12 @@ def test_batch_prediction():
 
     if response.status_code == 200:
         result = response.json()
-        print(f"\nBatch Prediction Results:")
+        print("\nBatch Prediction Results:")
         print(f"  Total: {result['total']}")
         print(f"  Discount Count: {result['discount_count']}")
         print(f"  No Discount Count: {result['no_discount_count']}")
 
-        print(f"\n  Individual Predictions:")
+        print("\n  Individual Predictions:")
         for pred in result["predictions"]:
             print(
                 f"    #{pred['index']}: {pred['discount_applied']} "

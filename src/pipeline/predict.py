@@ -156,8 +156,14 @@ def predict_discount_applied(data, model_dir="data/models"):
         "model_info": {
             "model_type": type(model).__name__,
             "n_features": len(feature_columns),
-            "model_depth": model.get_depth() if hasattr(model, "get_depth") else None,
-            "n_leaves": model.get_n_leaves() if hasattr(model, "get_n_leaves") else None,
+            "model_depth": (
+                model.get_depth() if hasattr(model, "get_depth") else None
+            ),
+            "n_leaves": (
+                model.get_n_leaves()
+                if hasattr(model, "get_n_leaves")
+                else None
+            ),
         },
         "timestamp": datetime.now().isoformat(),
     }
@@ -273,7 +279,9 @@ def predict_from_parquet(
         # Predecir todas las filas
         logger.info(f"Prediciendo {len(df)} filas en batch")
         return predict_batch(
-            df.to_dict("records"), model_dir=model_dir, save_results=save_results
+            df.to_dict("records"),
+            model_dir=model_dir,
+            save_results=save_results,
         )
 
 
@@ -321,12 +329,11 @@ if __name__ == "__main__":
     try:
         # Ejemplo 1: Prediccion individual (simula endpoint /predict/single)
         logger.info("\n1️⃣ Prediccion individual desde parquet...")
-        parquet_path="data/processed/data_processed.parquet"
+        parquet_path = "data/processed/data_processed.parquet"
 
         df_processed = pd.read_parquet(parquet_path)
         df_processed = df_processed.drop(columns=["Discount Applied"])
         print(df_processed.info())
-
 
         result = predict_from_parquet(
             parquet_path=parquet_path,
@@ -336,8 +343,12 @@ if __name__ == "__main__":
 
         logger.info("\n📊 Respuesta de API (JSON):")
         logger.info(f"   discount_applied: {result['discount_applied']}")
-        logger.info(f"   probability_discount: {result['probability_discount']:.4f}")
-        logger.info(f"   probability_no_discount: {result['probability_no_discount']:.4f}")
+        logger.info(
+            f"   probability_discount: {result['probability_discount']:.4f}"
+        )
+        logger.info(
+            f"   probability_no_discount: {result['probability_no_discount']:.4f}"
+        )
         logger.info(f"   confidence: {result['confidence']:.4f}")
         logger.info(f"   timestamp: {result['timestamp']}")
         logger.info(f"   model_type: {result['model_info']['model_type']}")
@@ -393,4 +404,5 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"❌ Error inesperado: {e}")
         import traceback
+
         traceback.print_exc()

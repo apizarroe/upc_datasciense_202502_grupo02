@@ -15,7 +15,9 @@ def preprocess_for_classification(df, target_column="Discount Applied"):
     logger.info("Iniciando preprocesamiento para clasificación...")
 
     # 1. Asegurar que Discount Applied sea numérico (0/1)
-    df_processed[target_column] = df_processed[target_column].astype(bool).astype(int)
+    df_processed[target_column] = (
+        df_processed[target_column].astype(bool).astype(int)
+    )
 
     # 2. Codificar variables categóricas relevantes
     essential_categoricals = ["Category", "Payment Method", "Location"]
@@ -29,10 +31,18 @@ def preprocess_for_classification(df, target_column="Discount Applied"):
 
     # 3. Características temporales
     if "Transaction Date" in df_processed.columns:
-        df_processed["Transaction_Year"] = df_processed["Transaction Date"].dt.year
-        df_processed["Transaction_Month"] = df_processed["Transaction Date"].dt.month
-        df_processed["Transaction_Quarter"] = df_processed["Transaction Date"].dt.quarter
-        df_processed["Transaction_DayOfWeek"] = df_processed["Transaction Date"].dt.dayofweek
+        df_processed["Transaction_Year"] = df_processed[
+            "Transaction Date"
+        ].dt.year
+        df_processed["Transaction_Month"] = df_processed[
+            "Transaction Date"
+        ].dt.month
+        df_processed["Transaction_Quarter"] = df_processed[
+            "Transaction Date"
+        ].dt.quarter
+        df_processed["Transaction_DayOfWeek"] = df_processed[
+            "Transaction Date"
+        ].dt.dayofweek
 
     # 4. Crear interacciones útiles
     if {"Price Per Unit", "Quantity"}.issubset(df_processed.columns):
@@ -47,7 +57,10 @@ def preprocess_for_classification(df, target_column="Discount Applied"):
         "Transaction Date",
         "Total Spent",  # Se elimina porque depende del descuento
     ]
-    df_processed = df_processed.drop(columns=[c for c in drop_cols if c in df_processed.columns], errors="ignore")
+    df_processed = df_processed.drop(
+        columns=[c for c in drop_cols if c in df_processed.columns],
+        errors="ignore",
+    )
 
     # 6. One-hot encoding para variables categóricas de ubicación o categoría
     categorical_for_onehot = ["Category", "Location", "Payment Method"]
@@ -59,10 +72,14 @@ def preprocess_for_classification(df, target_column="Discount Applied"):
 
     # 7. Escalar solo variables numéricas continuas
     scaler = StandardScaler()
-    numeric_cols = df_processed.select_dtypes(include=["int64", "float64"]).columns
+    numeric_cols = df_processed.select_dtypes(
+        include=["int64", "float64"]
+    ).columns
     numeric_cols = [c for c in numeric_cols if c != target_column]
 
-    df_processed[numeric_cols] = scaler.fit_transform(df_processed[numeric_cols])
+    df_processed[numeric_cols] = scaler.fit_transform(
+        df_processed[numeric_cols]
+    )
 
     # Escalar datos de predicción con el mismo scaler
     # if len(df_for_prediction) > 0:

@@ -15,11 +15,13 @@ def create_customer_features(df):
     # SOLO características realmente útiles para predecir Total Spent
     customer_features = (
         df.groupby("Customer ID")
-        .agg({
-            "Transaction ID": "count",           # Frecuencia de compra
-            "Total Spent": "mean",               # Gasto promedio
-            "Discount Applied": "mean",          # Frecuencia de descuentos
-        })
+        .agg(
+            {
+                "Transaction ID": "count",  # Frecuencia de compra
+                "Total Spent": "mean",  # Gasto promedio
+                "Discount Applied": "mean",  # Frecuencia de descuentos
+            }
+        )
         .round(2)
     )
 
@@ -27,15 +29,18 @@ def create_customer_features(df):
     customer_features.columns = [
         "Customer_Transaction_Count",
         "Customer_Avg_Spent",
-        "Customer_Discount_Frequency"
+        "Customer_Discount_Frequency",
     ]
 
     # Solo una métrica adicional importante
     customer_features["Customer_Recency"] = (
-        pd.to_datetime("today") - df.groupby("Customer ID")["Transaction Date"].max()
+        pd.to_datetime("today")
+        - df.groupby("Customer ID")["Transaction Date"].max()
     ).dt.days
 
-    logger.info(f"Características de cliente creadas: {customer_features.shape}")
+    logger.info(
+        f"Características de cliente creadas: {customer_features.shape}"
+    )
     return customer_features.reset_index()
 
 
@@ -46,11 +51,13 @@ def create_product_features(df):
     # SOLO características relevantes para predecir Total Spent
     product_features = (
         df.groupby(["Category", "Item"])
-        .agg({
-            "Transaction ID": "count",           # Popularidad
-            "Price Per Unit": "mean",            # Precio promedio
-            "Discount Applied": "mean",          # Frecuencia de descuentos
-        })
+        .agg(
+            {
+                "Transaction ID": "count",  # Popularidad
+                "Price Per Unit": "mean",  # Precio promedio
+                "Discount Applied": "mean",  # Frecuencia de descuentos
+            }
+        )
         .round(2)
     )
 
@@ -58,7 +65,7 @@ def create_product_features(df):
     product_features.columns = [
         "Product_Transaction_Count",
         "Product_Avg_Price",
-        "Product_Discount_Rate"
+        "Product_Discount_Rate",
     ]
 
     # Solo una métrica adicional importante
@@ -67,7 +74,9 @@ def create_product_features(df):
         product_features["Product_Transaction_Count"] / total_transactions
     )
 
-    logger.info(f"Características de producto creadas: {product_features.shape}")
+    logger.info(
+        f"Características de producto creadas: {product_features.shape}"
+    )
     return product_features.reset_index()
 
 
@@ -79,16 +88,12 @@ def enrich_transaction_data(df, customer_features, product_features):
 
     # Unir características de cliente
     df_enriched = df_enriched.merge(
-        customer_features,
-        on="Customer ID",
-        how="left"
+        customer_features, on="Customer ID", how="left"
     )
 
     # Unir características de producto
     df_enriched = df_enriched.merge(
-        product_features,
-        on=["Category", "Item"],
-        how="left"
+        product_features, on=["Category", "Item"], how="left"
     )
 
     logger.info(f"Dataset enriquecido: {df_enriched.shape}")

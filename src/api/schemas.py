@@ -44,6 +44,8 @@ class PredictionRequest(BaseModel):
     )
 
     class Config:
+        """Configuracion de Pydantic."""
+
         json_schema_extra = {
             "example": {
                 "features": {
@@ -90,6 +92,8 @@ class BatchPredictionRequest(BaseModel):
     )
 
     class Config:
+        """Configuracion de Pydantic."""
+
         json_schema_extra = {
             "example": {
                 "data_list": [
@@ -175,7 +179,9 @@ class PredictionResponse(BaseModel):
     probability_no_discount: float = Field(
         ..., description="Probabilidad de no descuento"
     )
-    probability_discount: float = Field(..., description="Probabilidad de descuento")
+    probability_discount: float = Field(
+        ..., description="Probabilidad de descuento"
+    )
     confidence: float = Field(..., description="Confianza de la prediccion")
     model_info: ModelInfo
     timestamp: str

@@ -10,10 +10,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 # Agregar path del proyecto para imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+project_root = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../..")
+)
 sys.path.insert(0, project_root)
 
-from src.api.schemas import (
+from src.api.schemas import (  # noqa: E402
     BatchPredictionRequest,
     BatchPredictionResponse,
     HealthResponse,
@@ -21,7 +23,7 @@ from src.api.schemas import (
     PredictionRequest,
     PredictionResponse,
 )
-from src.pipeline.predict import (
+from src.pipeline.predict import (  # noqa: E402
     load_model_artifacts,
     predict_batch,
     predict_discount_applied,
@@ -111,8 +113,14 @@ async def health_check():
         model_info = ModelInfo(
             model_type=type(model).__name__,
             n_features=len(MODEL_ARTIFACTS["feature_columns"]),
-            model_depth=model.get_depth() if hasattr(model, "get_depth") else None,
-            n_leaves=model.get_n_leaves() if hasattr(model, "get_n_leaves") else None,
+            model_depth=(
+                model.get_depth() if hasattr(model, "get_depth") else None
+            ),
+            n_leaves=(
+                model.get_n_leaves()
+                if hasattr(model, "get_n_leaves")
+                else None
+            ),
         )
 
     return HealthResponse(
@@ -225,8 +233,18 @@ async def predict_batch_endpoint(request: BatchPredictionRequest):
     ------------------
         {
             "data_list": [
-                {"Price Per Unit": -0.453, "Quantity": 1.592, "Transaction_Year": 2024, ...},
-                {"Price Per Unit": 0.234, "Quantity": -0.567, "Transaction_Year": 2023, ...}
+                {
+                    "Price Per Unit": -0.453,
+                    "Quantity": 1.592,
+                    "Transaction_Year": 2024,
+                    ...
+                },
+                {
+                    "Price Per Unit": 0.234,
+                    "Quantity": -0.567,
+                    "Transaction_Year": 2023,
+                    ...
+                }
             ]
         }
 
@@ -239,11 +257,16 @@ async def predict_batch_endpoint(request: BatchPredictionRequest):
         )
 
     try:
-        logger.info(f"📥 Recibiendo request de prediccion batch: {len(request.data_list)} items")
+        n_items = len(request.data_list)
+        logger.info(
+            f"📥 Recibiendo request de prediccion batch: {n_items} items"
+        )
 
         # Realizar prediccion batch
         results = predict_batch(
-            data_list=request.data_list, model_dir=MODEL_DIR, save_results=False
+            data_list=request.data_list,
+            model_dir=MODEL_DIR,
+            save_results=False,
         )
 
         # Calcular estadisticas
@@ -252,7 +275,8 @@ async def predict_batch_endpoint(request: BatchPredictionRequest):
 
         logger.info(
             f"✅ Prediccion batch exitosa: {len(results)} items "
-            f"({discount_count} con descuento, {no_discount_count} sin descuento)"
+            f"({discount_count} con descuento, "
+            f"{no_discount_count} sin descuento)"
         )
 
         return BatchPredictionResponse(
@@ -294,8 +318,12 @@ async def get_model_info():
         "n_features": len(feature_columns),
         "feature_columns": feature_columns[:10],  # Primeras 10 features
         "total_feature_columns": len(feature_columns),
-        "model_depth": model.get_depth() if hasattr(model, "get_depth") else None,
-        "n_leaves": model.get_n_leaves() if hasattr(model, "get_n_leaves") else None,
+        "model_depth": (
+            model.get_depth() if hasattr(model, "get_depth") else None
+        ),
+        "n_leaves": (
+            model.get_n_leaves() if hasattr(model, "get_n_leaves") else None
+        ),
     }
 
 
