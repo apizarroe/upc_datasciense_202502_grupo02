@@ -9,7 +9,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 logger = logging.getLogger(__name__)
 
 
-def preprocess_for_classification(df, target_column="Discount Applied"):
+def preprocess_for_classification(df: pd.DataFrame, target_column: str = "Discount Applied") -> tuple[pd.DataFrame, dict]:
     """Preprocesamiento para modelo de clasificación (descuento sí/no)."""
     df_processed = df.copy()
     logger.info("Iniciando preprocesamiento para clasificación...")

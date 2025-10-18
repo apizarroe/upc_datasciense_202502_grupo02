@@ -8,7 +8,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def create_customer_features(df):
+def create_customer_features(df: pd.DataFrame) -> pd.DataFrame:
     """Crear características agregadas por cliente OPTIMIZADAS."""
     logger.info("Creando características de cliente...")
 
@@ -44,7 +44,7 @@ def create_customer_features(df):
     return customer_features.reset_index()
 
 
-def create_product_features(df):
+def create_product_features(df: pd.DataFrame) -> pd.DataFrame:
     """Crear características agregadas por producto/categoría OPTIMIZADAS."""
     logger.info("Creando características de producto...")
 
@@ -80,7 +80,7 @@ def create_product_features(df):
     return product_features.reset_index()
 
 
-def enrich_transaction_data(df, customer_features, product_features):
+def enrich_transaction_data(df: pd.DataFrame, customer_features: pd.DataFrame, product_features: pd.DataFrame) -> pd.DataFrame:
     """Enriquecer datos con características agregadas."""
     logger.info("Enriqueciendo datos de transacción...")
 

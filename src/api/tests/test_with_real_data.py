@@ -9,7 +9,7 @@ import requests
 API_URL = "http://localhost:8000"
 
 
-def load_sample_data(n_samples=5):
+def load_sample_data(n_samples: int = 5) -> tuple[pd.DataFrame | None, any]:
     """Cargar datos de muestra del dataset procesado."""
     try:
         print("📥 Cargando datos procesados...")
@@ -45,7 +45,7 @@ def load_sample_data(n_samples=5):
         return None, None
 
 
-def test_with_real_data():  # noqa: C901
+def test_with_real_data() -> None:  # noqa: C901
     """Probar la API con datos reales."""
     print("\n" + "=" * 70)
     print("🧪 TEST API CON DATOS REALES")

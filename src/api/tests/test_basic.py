@@ -8,7 +8,7 @@ import requests
 API_URL = "http://localhost:8000"
 
 
-def test_health():
+def test_health() -> bool:
     """Test del endpoint de health check."""
     print("\n" + "=" * 70)
     print("1️⃣  TEST: Health Check")
@@ -21,7 +21,7 @@ def test_health():
     return response.status_code == 200
 
 
-def test_model_info():
+def test_model_info() -> bool:
     """Test del endpoint de informacion del modelo."""
     print("\n" + "=" * 70)
     print("2️⃣  TEST: Model Info")
@@ -45,7 +45,7 @@ def test_model_info():
     return response.status_code == 200
 
 
-def test_single_prediction():
+def test_single_prediction() -> bool:
     """Test del endpoint de prediccion individual."""
     print("\n" + "=" * 70)
     print("3️⃣  TEST: Single Prediction")
@@ -108,7 +108,7 @@ def test_single_prediction():
     return response.status_code == 200
 
 
-def test_batch_prediction():
+def test_batch_prediction() -> bool:
     """Test del endpoint de prediccion batch."""
     print("\n" + "=" * 70)
     print("4️⃣  TEST: Batch Prediction")
@@ -205,7 +205,7 @@ def test_batch_prediction():
     return response.status_code == 200
 
 
-def main():
+def main() -> None:
     """Ejecutar todos los tests."""
     print("\n" + "=" * 70)
     print("🧪 TESTING API DE PREDICCION DE DESCUENTOS - TESTS BASICOS")

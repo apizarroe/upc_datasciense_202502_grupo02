@@ -24,7 +24,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def run_pipeline(input_file, output_dir="data/processed"):
+def run_pipeline(input_file: str, output_dir: str = "data/processed") -> dict:
     """Pipeline completo de procesamiento de datos."""
     # Crear directorio de salida si no existe
     os.makedirs(output_dir, exist_ok=True)

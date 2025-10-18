@@ -64,7 +64,7 @@ MODEL_DIR = "data/models"
 
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     """Cargar modelo al iniciar la aplicacion."""
     global MODEL_ARTIFACTS
     try:
@@ -81,7 +81,7 @@ async def startup_event():
 
 
 @app.on_event("shutdown")
-async def shutdown_event():
+async def shutdown_event() -> None:
     """Limpiar recursos al cerrar la aplicacion."""
     logger.info("Cerrando API...")
 
@@ -92,7 +92,7 @@ async def shutdown_event():
 
 
 @app.get("/", tags=["General"])
-async def root():
+async def root() -> dict:
     """Endpoint raiz."""
     return {
         "message": "Discount Prediction API",
@@ -103,7 +103,7 @@ async def root():
 
 
 @app.get("/health", response_model=HealthResponse, tags=["General"])
-async def health_check():
+async def health_check() -> HealthResponse:
     """Health check endpoint."""
     model_loaded = bool(MODEL_ARTIFACTS)
 
@@ -136,7 +136,7 @@ async def health_check():
     status_code=status.HTTP_200_OK,
     tags=["Predictions"],
 )
-async def predict_single(request: PredictionRequest):
+async def predict_single(request: PredictionRequest) -> PredictionResponse:
     """Predecir si se aplicara descuento a una transaccion individual.
 
     Args
@@ -212,7 +212,7 @@ async def predict_single(request: PredictionRequest):
     status_code=status.HTTP_200_OK,
     tags=["Predictions"],
 )
-async def predict_batch_endpoint(request: BatchPredictionRequest):
+async def predict_batch_endpoint(request: BatchPredictionRequest) -> BatchPredictionResponse:
     """Predecir descuentos para multiples transacciones en batch.
 
     Args
@@ -301,7 +301,7 @@ async def predict_batch_endpoint(request: BatchPredictionRequest):
 
 
 @app.get("/model/info", tags=["Model"])
-async def get_model_info():
+async def get_model_info() -> dict:
     """Obtener informacion del modelo cargado."""
     if not MODEL_ARTIFACTS:
         raise HTTPException(
@@ -333,7 +333,7 @@ async def get_model_info():
 
 
 @app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
+async def global_exception_handler(request, exc) -> JSONResponse:
     """Manejador global de excepciones."""
     logger.error(f"Error no manejado: {exc}")
     return JSONResponse(
