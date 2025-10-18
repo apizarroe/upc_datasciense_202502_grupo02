@@ -319,8 +319,15 @@ if __name__ == "__main__":
     try:
         # Ejemplo 1: Prediccion individual (simula endpoint /predict/single)
         logger.info("\n1️⃣ Prediccion individual desde parquet...")
+        parquet_path="data/processed/data_processed.parquet"
+
+        df_processed = pd.read_parquet(parquet_path)
+        df_processed = df_processed.drop(columns=["Discount Applied"])
+        print(df_processed.info())
+
+
         result = predict_from_parquet(
-            parquet_path="data/processed/data_processed.parquet",
+            parquet_path=parquet_path,
             model_dir="data/models",
             row_index=0,  # Primera fila
         )
