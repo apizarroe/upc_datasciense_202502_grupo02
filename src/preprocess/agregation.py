@@ -36,8 +36,9 @@ def create_customer_features(df: pd.DataFrame) -> pd.DataFrame:
 
     # Solo una métrica adicional importante
     max_dates = df.groupby("Customer ID")["Transaction Date"].max()
-    today = pd.Timestamp("today")
-    customer_features["Customer_Recency"] = (today - max_dates).dt.days
+    today = pd.Timestamp.now()
+    recency = today - max_dates  # type: ignore[operator]
+    customer_features["Customer_Recency"] = recency.dt.days
 
     logger.info(
         f"Características de cliente creadas: {customer_features.shape}"

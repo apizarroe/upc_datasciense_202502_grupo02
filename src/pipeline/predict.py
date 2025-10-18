@@ -352,18 +352,18 @@ if __name__ == "__main__":
         )
 
         logger.info("\n📊 Respuesta de API (JSON):")
-        # type: ignore comentarios para dict access en Union type
-        discount = result['discount_applied']  # type: ignore
+        # Dict access en Union type requiere type: ignore
+        discount = result['discount_applied']  # type: ignore[index]
         logger.info(f"   discount_applied: {discount}")
-        prob_discount = result["probability_discount"]  # type: ignore
+        prob_discount = result["probability_discount"]  # type: ignore[index]
         logger.info(f"   probability_discount: {prob_discount:.4f}")
-        prob_no = result["probability_no_discount"]  # type: ignore
+        prob_no = result["probability_no_discount"]  # type: ignore[index]
         logger.info(f"   probability_no_discount: {prob_no:.4f}")
-        confidence = result['confidence']  # type: ignore
+        confidence = result['confidence']  # type: ignore[index]
         logger.info(f"   confidence: {confidence:.4f}")
-        timestamp = result['timestamp']  # type: ignore
+        timestamp = result['timestamp']  # type: ignore[index]
         logger.info(f"   timestamp: {timestamp}")
-        model_info = result['model_info']  # type: ignore
+        model_info = result['model_info']  # type: ignore[index]
         logger.info(f"   model_type: {model_info['model_type']}")
 
         # Ejemplo 2: Prediccion batch (simula endpoint /predict/batch)
