@@ -1,6 +1,7 @@
 """Script para probar la API usando datos reales del dataset procesado."""
 
 import os
+from typing import Any, Optional, Tuple
 
 import pandas as pd
 import requests
@@ -9,7 +10,9 @@ import requests
 API_URL = "http://localhost:8000"
 
 
-def load_sample_data(n_samples=5):
+def load_sample_data(
+    n_samples: int = 5,
+) -> Tuple[Optional[pd.DataFrame], Any]:
     """Cargar datos de muestra del dataset procesado."""
     try:
         print("📥 Cargando datos procesados...")
@@ -37,7 +40,9 @@ def load_sample_data(n_samples=5):
         return sample_df, y_true
 
     except FileNotFoundError:
-        print("❌ Error: No se encontró data/processed/data_processed.parquet")
+        print(
+            "❌ Error: No se encontró " "data/processed/data_processed.parquet"
+        )
         print("   Ejecuta primero el preprocesamiento de datos")
         return None, None
     except Exception as e:
@@ -45,7 +50,7 @@ def load_sample_data(n_samples=5):
         return None, None
 
 
-def test_with_real_data():  # noqa: C901
+def test_with_real_data() -> None:  # noqa: C901
     """Probar la API con datos reales."""
     print("\n" + "=" * 70)
     print("🧪 TEST API CON DATOS REALES")
@@ -144,17 +149,18 @@ def test_with_real_data():  # noqa: C901
             confidence = pred["confidence"]
 
             if y_true is not None:
-                actual = bool(y_true[idx])
-                match = "✅" if actual == predicted else "❌"
-                if actual == predicted:
+                actual_bool = bool(y_true[idx])
+                actual_str = str(actual_bool)
+                match = "✅" if actual_bool == predicted else "❌"
+                if actual_bool == predicted:
                     correct_predictions += 1
             else:
-                actual = "N/A"
+                actual_str = "N/A"
                 match = "-"
 
             print(
                 f"   {idx:<4} {str(predicted):<12} {confidence:<12.2%} "
-                f"{str(actual):<12} {match:<8}"
+                f"{actual_str:<12} {match:<8}"
             )
 
         if y_true is not None:
